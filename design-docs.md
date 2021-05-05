@@ -15,7 +15,7 @@ flags for program:
   -h, --human-readable, 
     Use human-readable text instead of CSV-like syntax
   --all, --no-all
-    Include or exclude all possible data
+    Include or exclude all possible metrics
   --temperature, --no-temperature
     Include or exclude temperature
   --precipitation, --no-precipitation
@@ -23,6 +23,14 @@ flags for program:
   And so on for wind, wetterwarnungen etc. etc.
   -a, --ascii
     Include an ascii graphic for every requested unit
+  --graph METRICS
+    Show an ascii graph for the requested metrics
+    e.g. for preciptation
+    *
+    **
+    **  *        *
+    ******    *  *
+    <inserrt times here>
   --cache-duration DURATION
     Specify the duration to cache previous results
   --cache-revalidate-partial, --no-cache-revalidate-partial
