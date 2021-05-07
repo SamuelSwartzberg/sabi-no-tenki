@@ -35,6 +35,8 @@ flags for program:
     Specify the duration to cache previous results
   --cache-revalidate-partial, --no-cache-revalidate-partial
     If only partial result in cache, refetch all data
+  --significant-figures FIGURES
+    give this amount of significant figures (e.g. --significant-figures 1 -> 25.1 C)
 ```
 config file: In TOML  
   options: cache duration  
@@ -43,5 +45,8 @@ Cache:
 Program flow:  
   Main logic struct: Weather for a specific time unit and relevant data  
   Flow: Parse request + options in config, set output paramenters, figure out what we have to fetch => check cache, fetch from API => assemble into sequence of weather structs => Read output parameters, transform Weather structs sequence into output => print output  
+Weather structs
+  perhaps parse information like types of weather ("cloudy", "sunny", etc.) into enums, to allow for easy localization when need arises
+  
 
                                         
