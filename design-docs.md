@@ -20,7 +20,7 @@ flags for program:
     Include or exclude temperature
   --precipitation, --no-precipitation
     Include or exclude temperature
-  And so on for wind, wetterwarnungen etc. etc.
+  And so on for kind of weather, wind, wetterwarnungen etc. etc.
   -a, --ascii
     Include an ascii graphic for every requested unit
   --graph METRICS
@@ -37,16 +37,32 @@ flags for program:
     If only partial result in cache, refetch all data
   --significant-figures FIGURES
     give this amount of significant figures (e.g. --significant-figures 1 -> 25.1 C)
+  --emoji / --text
+    Show things such as current weather as emoji, text, or both (e.g. 'Rainy', '🌧', or '🌧 Rainy'
 ```
 config file: In TOML  
   options: cache duration  
 Cache:  
   Cache should work partially, that is we store any result in cache in such a way that we can access it easily and combine it with data from a new request  
 Program flow:  
+  ```
+  Parse input  
+  -> if invalid or --help -> return the relevant thing
+  -> set the output parameters/flags
+  -> set the requestBuilder parameters/flags
+  Parse options file
+  -> set the output parameters/flags
+  -> set the requestBuilder parameters/flags
+  build a request (API-specific)
+  -> check cache
+  recieve response
+  -> save response in cache
+  parse response (API-specific) into sequence of Weather structs \\NOTE: if we're combining APIs, we might need to do this multiple times
+  reade output flags, build output from Weather structs
+  ```
+Weather structs:
   Main logic struct: Weather for a specific time unit and relevant data  
-  Flow: Parse request + options in config, set output paramenters, figure out what we have to fetch => check cache, fetch from API => assemble into sequence of weather structs => Read output parameters, transform Weather structs sequence into output => print output  
-Weather structs
-  perhaps parse information like types of weather ("cloudy", "sunny", etc.) into enums, to allow for easy localization when need arises
+  perhaps parse information like types of weather ("cloudy", "sunny", etc.) into enums, to allow for easy localization & different display when need arises
   
 
                                         
