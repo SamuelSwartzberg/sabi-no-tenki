@@ -27,7 +27,8 @@ shorthand-values = 'today'|'week'|'weekend'|'next-week'
   :6d:2d - in the next six days, every second day
 
 
-Leaving out step is usually fine - if you specify a h value for any of the values, it will presume hour-based stepping, otherwise it will presume day-based stepping.
+Leaving out step is usually fine - if you specify a h value for any of the values, 
+it will presume hour-based stepping, otherwise it will presume day-based stepping.
 
 ```
 
@@ -90,12 +91,13 @@ If caching is enabled, will cache responses and reuse them if still considered v
   -> check cache
   recieve response
   -> save response in cache
-  parse response (API-specific) into sequence of Weather structs \\NOTE: if we're combining APIs, we might need to do this multiple times
+  parse response (API-specific) into sequence of Weather structs 
+    \\NOTE: if we're combining APIs, we might need to do this multiple times
   reade output flags, build output from Weather structs
   ```
 ## Weather structs
-  Main logic struct: Weather for a specific time unit and relevant data  
-   parse information like types of weather ("cloudy", "sunny", etc.) into enums, to allow for easy localization & different display when need arises
+Main logic struct: Weather for a specific time unit and relevant data  
+parse information like types of weather ("cloudy", "sunny", etc.) into enums, to allow for easy localization & different display when need arises
   
 
                                         
