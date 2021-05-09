@@ -1,14 +1,38 @@
-A terminal command line weather client with fine-grained options.
+# Sabi no Tenki
 
-# Features
-Different flags (options)
-Abstraction/Hooks for different APIs
+A terminal command line weather client with fine-grained options and a pretentious and possibly incorrect japanese name.
 
-# Ideas
-syntax for date selection:  
-  start\[:end\[:step]], e.g. 1h, 5d, 2w, 1h:10h, :12h:3h 3d:6d, with shorthand for keyword values like today, this week, this weekend  
-default output in CSV-like syntax, unless specified (complies with UNIX philosophy of using text as the main tool of data transmition and being combinable with other programs)  
-flags for program:  
+## Synopsis
+
+tenki \[options] \[time]
+
+## Time
+
+```
+time = [start\[:end]\[:step]]] | shorthand-values
+start = time-value
+end = time-value
+step = time-value
+time-value = time,unit
+time = 0...23
+unit = 'd'|'h'
+shorthand-values = 'today'|'week'|'weekend'|'next-week'
+
+  no value - now
+  1h - in one hour
+  5d - in 5 days
+  2w - in two weeks
+  1h:10h - in the 9 hours starting one hour from now
+  1h:10h:3h - in the in the 9 hours starting one hour from now every three hours
+  :6d:2d - in the next six days, every second day
+
+
+Leaving out step is usually fine - if you specify a h value for any of the values, it will presume hour-based stepping, otherwise it will presume day-based stepping.
+
+```
+
+## Options
+
 ```
   --api API 
     Use specified api
@@ -38,13 +62,22 @@ flags for program:
   --significant-figures FIGURES
     give this amount of significant figures (e.g. --significant-figures 1 -> 25.1 C)
   --emoji / --text
-    Show things such as current weather as emoji, text, or both (e.g. 'Rainy', '🌧', or '🌧 Rainy'
+    Show things such as current weather as emoji, text, or both (e.g. 'Rainy', '🌧', or '🌧 Rainy')
 ```
-config file: In TOML  
-  options: cache duration  
-Cache:  
-  Cache should work partially, that is we store any result in cache in such a way that we can access it easily and combine it with data from a new request  
-Program flow:  
+
+## Output
+
+outputs in CSV-like syntax, unless `-h` is specified. (complies with UNIX philosophy of using text as the main tool of data transmition and being combinable with other programs) 
+
+## Config
+
+reads from a `$XDG_CONFIG_HOME/sabi-no-tenki` file. Formatted in TOML. Set options here as `option=value`.
+
+## Caching
+
+If caching is enabled, will cache responses and reuse them if still considered valid. On partial cache hit, will revalidate, as the cost of revalidating some vs all the cache are nearly the same.
+
+## Program flow
   ```
   Parse input  
   -> if invalid or --help -> return the relevant thing
@@ -60,9 +93,9 @@ Program flow:
   parse response (API-specific) into sequence of Weather structs \\NOTE: if we're combining APIs, we might need to do this multiple times
   reade output flags, build output from Weather structs
   ```
-Weather structs:
+## Weather structs
   Main logic struct: Weather for a specific time unit and relevant data  
-  perhaps parse information like types of weather ("cloudy", "sunny", etc.) into enums, to allow for easy localization & different display when need arises
+   parse information like types of weather ("cloudy", "sunny", etc.) into enums, to allow for easy localization & different display when need arises
   
 
                                         
