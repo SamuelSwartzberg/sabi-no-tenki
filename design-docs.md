@@ -35,6 +35,10 @@ it will presume hour-based stepping, otherwise it will presume day-based steppin
 ## Options
 
 ```
+  -l, --location LOCATION-LIST
+    Use the specified location. Best specified in options file for default location.
+    List is separated by colons (:) (rationale: there are no place names containing colons,
+    and it is the separator e.g. in the $PATH variable)
   --api API 
     Use specified api
   -h, --human-readable, 
