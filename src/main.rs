@@ -1,4 +1,5 @@
 use clap::{Arg, App, SubCommand};
+use chrono;
 
 fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remove static lifetimes once I become clear what the lifetimes of App are
     return App::new("Sabi no Tenki")
@@ -72,15 +73,37 @@ fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remove st
     .get_matches();
 }
 
-fn parse_matches_into_options(){
+enum Api{
+  foobar
+}
+
+enum Metric{
+  precipitation_mm(u32),
+  temperature_c(f32),
+   // etc...
+}
+
+struct ProgOptions{
+  time_list: Vec<chrono::DateTime>,
+  location_list: Vec<&str>,
+  api: Api,
+  human_readable: bool,
+  significant_figures: i8,
+  emoji: bool,
+  text: bool,
+  graph: Vec<Metric>,
+  cache_duration: chrono::Duration
+}
+
+fn parse_matches_into_options() -> ProgOptions{
 
 }
 
-fn build_request(){
+fn build_request(&ProgOptions options){
 
 }
 
-fn get_result_from_cache(){
+fn get_result_from_cache() -> Result<???,&str>{
 
 }
 
@@ -92,16 +115,30 @@ fn get_result_from_request(){
   get_result_from_cache().or_else(get_result_from_http_request())?
 }
 
-fn generate_output(){
+struct WeatherItem{
+  date: chrono::DateTime,
+  location: &str,
+  metrics: Vec<Metric>
+}
+
+fn parse_result() -> Vec<WeatherItem>{
 
 }
 
-fn get_shell_specs(){
-
-}
-
-fn print_output(){
+struct ShellSpecs{
   
+}
+
+fn generate_output(&Vec<WeatherItem> weather_items, &ProgOptions options, &ShellSpecs shell_specs) -> &str{
+
+}
+
+fn get_shell_specs() -> ShellSpecs{
+
+}
+
+fn print_output(&str output){
+
 }
 
 fn main() {
@@ -110,6 +147,8 @@ fn main() {
   // https://github.com/clap-rs/clap/issues/1693
   // https://github.com/clap-rs/clap/issues/748
   // https://github.com/clap-rs/clap/issues/251
+
+  // functions returning values should be pure functions, outside of throwing errors
   let matches = get_command_line_input();
   let options = parse_matches_into_options(matches);
   let request = build_request(&options);
