@@ -1,5 +1,6 @@
 use clap::{Arg, App, SubCommand};
 use chrono;
+use api;
 
 fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remove static lifetimes once I become clear what the lifetimes of App are
     return App::new("Sabi no Tenki")
@@ -73,9 +74,7 @@ fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remove st
     .get_matches();
 }
 
-enum Api{
-  foobar
-}
+
 
 enum Metric{
   precipitation_mm(u32),
@@ -86,7 +85,7 @@ enum Metric{
 struct ProgOptions{
   time_list: Vec<chrono::DateTime>,
   location_list: Vec<&str>,
-  api: Api,
+  api: api::Api,
   human_readable: bool,
   significant_figures: i8,
   emoji: bool,
@@ -96,10 +95,6 @@ struct ProgOptions{
 }
 
 fn parse_matches_into_options() -> ProgOptions{
-
-}
-
-fn build_request(&ProgOptions options){
 
 }
 
@@ -121,9 +116,7 @@ struct WeatherItem{
   metrics: Vec<Metric>
 }
 
-fn parse_result() -> Vec<WeatherItem>{
 
-}
 
 struct ShellSpecs{
   
@@ -151,10 +144,10 @@ fn main() {
   // functions returning values should be pure functions, outside of throwing errors
   let matches = get_command_line_input();
   let options = parse_matches_into_options(matches);
-  let request = build_request(&options);
+  let request = options.api.build_request(&options);
   let result = get_result_from_request(request);
   cache_result(&result);
-  let weather_parsed_result = parse_result(&result);
+  let weather_parsed_result = options.api.parse_result(&result);
   let output = generate_output(&weather_parsed_result, &options, get_shell_specs());
   print_output(output);
 }
