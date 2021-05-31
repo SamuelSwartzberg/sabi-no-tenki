@@ -1,7 +1,7 @@
 use clap::{Arg, App, SubCommand};
 
-fn main() {
-    let matches = App::new("Sabi no Tenki")
+fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remove static lifetimes once I become clear what the lifetimes of App are
+    return App::new("Sabi no Tenki")
     .version("0.0")
     .author("Sam S. <me@samswartzberg.com>")
     .help("A terminal command line weather client with fine-grained options and a pretentious and possibly incorrect japanese name.")
@@ -68,8 +68,54 @@ fn main() {
 
             Leaving out step is usually fine - if you specify a h value for any of the values, 
             it will presume hour-based stepping, otherwise it will presume day-based stepping.")
-        .required(true)
         .index(1))
     .get_matches();
-    println!("Hello, world!");
+}
+
+fn parse_matches_into_options(){
+
+}
+
+fn build_request(){
+
+}
+
+fn get_result_from_cache(){
+
+}
+
+fn get_result_from_http_request() -> Result<???,&str>{
+
+}
+
+fn get_result_from_request(){
+  get_result_from_cache().or_else(get_result_from_http_request())?
+}
+
+fn generate_output(){
+
+}
+
+fn get_shell_specs(){
+
+}
+
+fn print_output(){
+  
+}
+
+fn main() {
+  // get values from config file, not sure how. It would be nice if we could feed the config file into clap.rs somehow
+  // github issuses mentioning this:
+  // https://github.com/clap-rs/clap/issues/1693
+  // https://github.com/clap-rs/clap/issues/748
+  // https://github.com/clap-rs/clap/issues/251
+  let matches = get_command_line_input();
+  let options = parse_matches_into_options(matches);
+  let request = build_request(&options);
+  let result = get_result_from_request(request);
+  cache_result(&result);
+  let weather_parsed_result = parse_result(&result);
+  let output = generate_output(&weather_parsed_result, &options, get_shell_specs());
+  print_output(output);
 }
