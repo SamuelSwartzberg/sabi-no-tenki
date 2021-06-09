@@ -16,7 +16,7 @@ fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remove st
     .arg(Arg::with_name("api")
         .long("api")
         .value_name("API")
-        .help("Use specified api")
+        .help("Use specified api. Not all requested metrics are available for all apis.")
         .takes_value(true))
     .arg(Arg::with_name("human-readable")
         .short("h")
@@ -41,6 +41,11 @@ fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remove st
         .long("significant-figures")
         .help("give this amount of significant figures (e.g. --significant-figures 1 -> 25.1 C)")
         .value_name("FIGURES")
+        .takes_value(true))
+    .arg(Arg::with_name("metrics")
+        .long("metrics")
+        .help("Specify a list of metrics you would like to recieve, as a non-spaced comma-separated list. Not all requested metrics are available for all apis.")
+        .value_name("METRIC-LIST")
         .takes_value(true))
     .arg(Arg::with_name("emoji")
         .long("emoji")
@@ -76,22 +81,50 @@ fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remove st
 
 
 
-enum Metric{
-  precipitation_mm(u32),
-  temperature_c(f32),
-   // etc...
+enum MetricType{
+  weather_type,
+  wind_speed,
+  wind_direction,
+  temperature_cur,
+  temperature_min,
+  temperature_max,
+  humidity,
+  pressure,
+  precipitation,
+  uv_index,
+  air_quality,
+  visibility,
+  predictability,
+  feels_like,
+  cloud_cover,
+  heat_index,
+  dewpoint,
+  wind_chill,
+  wind_gust,
+  feels_like,
+  chance_of_rain,
+  chance_of_remaining_dry,
+  chance_of_windy,
+  chance_of_overcast,
+  chance_of_sunshine,
+  chance_of_frost,
+  chance_of_high_temp,
+  chance_of_fog,
+  chance_of_snow,
+  chance_of_thunder
 }
 
 struct ProgOptions{
   time_list: Vec<chrono::DateTime>,
   location_list: Vec<&str>,
-  api: api::Api,
+  api: impl api::Query,
   human_readable: bool,
   significant_figures: i8,
   emoji: bool,
   text: bool,
-  graph: Vec<Metric>,
-  cache_duration: chrono::Duration
+  graph: Vec<MetricType>,
+  cache_duration: chrono::Duration,
+  metrics: Vec<MetricType>
 }
 
 fn parse_matches_into_options() -> ProgOptions{
