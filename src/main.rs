@@ -62,12 +62,12 @@ fn main() {
   // https://github.com/clap-rs/clap/issues/251
 
   // functions returning values should be pure functions, outside of throwing errors
-  let matches = get_command_line_input();
-  let options = parse_matches_into_options(matches);
+  let matches = input::get_command_line_input();
+  let options = input::parse_matches_into_options(matches);
   let request = options.api.build_request(&options);
-  let result = get_result_from_request(request);
-  cache_result(&result, options.cache_duration);
+  let result = http_request::get_result_from_request(request);
+  cache::cache_result(&result, options.cache_duration);
   let weather_parsed_result = options.api.parse_result(&result);
-  let output = generate_output(&weather_parsed_result, &options, get_shell_specs());
+  let output = output_generator::generate_output(&weather_parsed_result, &options, get_shell_specs());
   println!(output);
 }
