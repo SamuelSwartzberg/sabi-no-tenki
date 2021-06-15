@@ -6,7 +6,7 @@ trait Query{
   fn transform_generic_metric_name_to_api_specific(&Vec<MetricType>) -> Vec<String>;
 }
 fn get_api(&str api_name) -> impl Query{
-
+  
 }
 
 struct MetaweatherQuery{
