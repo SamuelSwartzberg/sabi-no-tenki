@@ -1,44 +1,43 @@
-use clap::{Arg, App, SubCommand};
 use chrono;
-use api, input, cache, http_request, output_generator;
+mod input;
+mod api;
 
 enum MetricType{
-  weather_type,
-  wind_speed,
-  wind_direction,
-  temperature_cur,
-  temperature_min,
-  temperature_max,
-  humidity,
-  pressure,
-  precipitation,
-  uv_index,
-  air_quality,
-  visibility,
-  predictability,
-  feels_like,
-  cloud_cover,
-  heat_index,
-  dewpoint,
-  wind_chill,
-  wind_gust,
-  feels_like,
-  chance_of_rain,
-  chance_of_remaining_dry,
-  chance_of_windy,
-  chance_of_overcast,
-  chance_of_sunshine,
-  chance_of_frost,
-  chance_of_high_temp,
-  chance_of_fog,
-  chance_of_snow,
-  chance_of_thunder
+  WeatherType,
+  WindSpeed,
+  WindDirection,
+  TemperatureCur,
+  TemperatureMin,
+  TemperatureMax,
+  Humidity,
+  Pressure,
+  Precipitation,
+  UvIndex,
+  AirQuality,
+  Visibility,
+  Predictability,
+  CloudCover,
+  HeatIndex,
+  Dewpoint,
+  WindChill,
+  WindGust,
+  FeelsLike,
+  ChanceOfRain,
+  ChanceOfRemainingDry,
+  ChanceOfWindy,
+  ChanceOfOvercast,
+  ChanceOfSunshine,
+  ChanceOfFrost,
+  ChanceOfHighTemp,
+  ChanceOfFog,
+  ChanceOfSnow,
+  ChanceOfThunder
 }
 
 struct ProgOptions{
-  time_list: Vec<chrono::DateTime>,
-  location_list: Vec<&str>,
-  api: impl api::Query,
+  time_list: Vec<chrono::DateTime<chrono::Utc>>,
+  location_list: Vec<String>,
+  api: Box<dyn api::Query>,
   human_readable: bool,
   significant_figures: i8,
   emoji: bool,
@@ -49,10 +48,15 @@ struct ProgOptions{
 }
 
 struct WeatherItem{ 
-  date: chrono::DateTime, 
-  location: &str, 
+  date: chrono::DateTime<chrono::Utc>, 
+  location: String, 
   metrics: Vec<Metric> 
 } 
+
+struct Metric{
+  type_of: MetricType,
+  value: Box<dyn Display>
+}
 
 fn main() {
   // get values from config file, not sure how. It would be nice if we could feed the config file into clap.rs somehow
@@ -63,11 +67,11 @@ fn main() {
 
   // functions returning values should be pure functions, outside of throwing errors
   let matches = input::get_command_line_input();
-  let options = input::parse_matches_into_options(matches);
-  let request = options.api.build_request(&options);
-  let result = http_request::get_result_from_request(request);
-  cache::cache_result(&result, options.cache_duration);
-  let weather_parsed_result = options.api.parse_result(&result);
-  let output = output_generator::generate_output(&weather_parsed_result, &options, get_shell_specs());
-  println!(output);
+  // let options = input::parse_matches_into_options(matches);
+  // let request = options.api.build_request(&options);
+  // let result = http_request::get_result_from_request(request);
+  // cache::cache_result(&result, options.cache_duration);
+  // let weather_parsed_result = options.api.parse_result(&result);
+  // let output = output_generator::generate_output(&weather_parsed_result, &options, get_shell_specs());
+  // println!(output);
 }

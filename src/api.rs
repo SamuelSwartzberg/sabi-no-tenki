@@ -1,34 +1,32 @@
+use crate::{ProgOptions, WeatherItem, MetricType};
+use std::collections::HashMap;
 
-trait Query{
-  fn build_request(&ProgOptions options);
-  fn parse_result() -> Vec<WeatherItem>;
-  fn is_name_of(&str) -> bool;
-  fn transform_generic_metric_name_to_api_specific(&Vec<MetricType>) -> Vec<String>;
+pub trait Query{
+  fn build_request(&self, options: &ProgOptions );
+  fn parse_result(&self) -> Vec<WeatherItem>;
+  fn is_name_of(&self, name: &str) -> bool;
+  fn transform_generic_metric_name_to_api_specific(&self, metrics: &Vec<MetricType>) -> Vec<String>;
 }
-fn get_api(&str api_name) -> impl Query{
-  
-}
-
-struct MetaweatherQuery{
-  names: Vec<&str>,
-  generic_metric_names_map: HashMap
-}
-
-impl Query for MetaweatherQuery{
-  fn build_request(&ProgOptions options);
-  fn parse_result() -> Vec<WeatherItem>;
-  fn is_name_of(&str name) -> bool{
-    names.contains(name);
-  }
-}
-
-let metaweather_query = struct MetaweatherQuery{
-  names: ["metaweather", "mw"]
-}
-
-let apis[1, impl Query] = [metaweather_query]
-
-
+//fn get_api( api_name: &str) -> impl Query{
+//    let metaweather_query =  MetaweatherQuery{
+//        names: vec!["metaweather", "mw"]
+//    };
+//    let apis: [1; impl Query] = [metaweather_query]; 
+//}
+//
+//struct MetaweatherQuery{
+//  names: Vec<&str>,
+//  generic_metric_names_map: HashMap<MetricType, &str>
+//}
+//
+//impl Query for MetaweatherQuery{
+//  fn build_request(options: &ProgOptions ){};
+//  fn parse_result() -> Vec<WeatherItem>{};
+//  fn is_name_of( name: &str) -> bool{
+//    names.contains(name);
+//  }
+//}
+//
 
 //   metaweather, //https://www.metaweather.com/api/#locationsearch
 //  Weather-related response fields

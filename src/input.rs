@@ -1,5 +1,7 @@
+use clap::{Arg, App /*, SubCommand*/};
+use crate::ProgOptions;
 
-fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remove static lifetimes once I become clear what the lifetimes of App are
+pub fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remove static lifetimes once I become clear what the lifetimes of App are
     return App::new("Sabi no Tenki")
     .version("0.0")
     .author("Sam S. <me@samswartzberg.com>")
@@ -76,7 +78,7 @@ fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remove st
     .get_matches();
 }
 
-fn parse_matches_into_options() -> ProgOptions{ 
+pub fn parse_matches_into_options() -> ProgOptions{ 
  
 } 
 
