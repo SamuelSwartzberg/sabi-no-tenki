@@ -1,7 +1,10 @@
 use chrono;
 mod input;
 mod api;
+use strum;
 
+#[derive(EnumString, Display)] 
+#[strum(ascii_case_insensitive)]
 enum MetricType{
   WeatherType,
   WindSpeed,

@@ -1,5 +1,6 @@
 use clap::{Arg, App /*, SubCommand*/};
 use crate::ProgOptions;
+use strum;
 
 pub fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remove static lifetimes once I become clear what the lifetimes of App are
     return App::new("Sabi no Tenki")
@@ -33,7 +34,7 @@ pub fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remov
         .takes_value(true))
     .arg(Arg::with_name("cache-duration")
         .long("cache-duration")
-        .help("Specify the duration to cache previous results")
+        .help("Specify the duration to cache previous results (in minutes)")
         .value_name("DURATION")
         .takes_value(true))
     .arg(Arg::with_name("significant-figures")
@@ -78,17 +79,43 @@ pub fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remov
     .get_matches();
 }
 fn parse_time(time_string: String) -> Vec<chrono::DateTime<chrono::Utc>>{
-
+  let time_components = time_string.split(":");
+  let start = time_components.next().unwrap();
+  match time_conponents.next(){
+    None => {
+      //
+    }, Some(stop) => {
+      let step = time_components.next().unwrap_or_else(||
+        {
+          let hour_step = start.contains("h") || stop.contains("h");
+          if hour_step {
+            chrono::Duration::hours(1)
+          } else { 
+            chrono::Duration::days(1)
+          };
+        });
+      }
 }
+
+fn get_metric_vector(option_name: &str) -> Vec<MetricType>{
+    let metric_type_vector = Vec::new();
+    for metric_string in matches.value_of(option_name).map_or(std::iter::empty::<&str>(), |graph_string| graph_string.split(",")){
+      let metric_enum_equivalent = MetricType::from_str(metric_string);
+      if (metric_enum_equivalent.is_some()) {metric_type_vector.push(metric_enum_equivalent)}
+    }
+    metric_type_vector
+  }
 pub fn parse_matches_into_options() -> ProgOptions{
   let location_list = matches.value_of("location").map_or(Vec<String>::new(), |location_list_string| location_list_string.split(":").collect());
   let time_list = matches.value_of("time").map_or(vec![chrono::Local::now(), |time_string| parse_time(time_string))
-
-
+  let api = api::get_api(matches.value_of("api").unwrap_or("not sure what we want to do when no api specified") 
+  let human_readable = matches.is_present("human-readable");
   let significant_figures = matches.value_of("significant_figures").map_or(0,|significant_figure_string| significant_figure_string.parse().unwrap();
   let emoji = matches.is_present("emoji");
   let text = matches.is_present("text");
-
+  let graph = get_metric_vector("graph");
+  let cache_duration = matches.value_of("cache-duration").map_or(chrono::Duration::minutes(60), |cache_duration_string| chrono::Duration::minutes(cache_duration_string.parse().unwrap()); 
+  let metrics = get_metric_vector("metrics");
   return ProgOptions{
     location_list,
     time_list,
