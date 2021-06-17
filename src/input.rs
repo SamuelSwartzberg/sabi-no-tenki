@@ -52,7 +52,7 @@ pub fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remov
     .arg(Arg::with_name("text")
         .long("text")
         .help("Show things such as current weather as text (e.g. 'Rainy'). Can be combined with --emoji if both are desired (e.g. '🌧️ Rainy')."))
-    .arg(Arg::with_name("TIME")
+    .arg(Arg::with_name("time")
         .help("The time span to fetch weather for:
             time = [start[:end][:step]]] | shorthand-values
             start = time-value
@@ -77,8 +77,29 @@ pub fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remov
         .index(1))
     .get_matches();
 }
+fn parse_time(time_string: String) -> Vec<chrono::DateTime<chrono::Utc>>{
 
-pub fn parse_matches_into_options() -> ProgOptions{ 
- 
+}
+pub fn parse_matches_into_options() -> ProgOptions{
+  let location_list = matches.value_of("location").map_or(Vec<String>::new(), |location_list_string| location_list_string.split(":").collect());
+  let time_list = matches.value_of("time").map_or(vec![chrono::Local::now(), |time_string| parse_time(time_string))
+
+
+  let significant_figures = matches.value_of("significant_figures").map_or(0,|significant_figure_string| significant_figure_string.parse().unwrap();
+  let emoji = matches.is_present("emoji");
+  let text = matches.is_present("text");
+
+  return ProgOptions{
+    location_list,
+    time_list,
+    api,
+    human_readable,
+    significant_figures,
+    emoji,
+    text,
+    graph,
+    cache_duration,
+    metrics
+  }
 } 
 

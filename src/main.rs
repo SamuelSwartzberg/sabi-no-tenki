@@ -55,7 +55,7 @@ struct WeatherItem{
 
 struct Metric{
   type_of: MetricType,
-  value: Box<dyn Display>
+  value: Box<dyn std::fmt::Display>
 }
 
 fn main() {
