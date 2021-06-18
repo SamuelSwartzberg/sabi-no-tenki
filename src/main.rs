@@ -1,7 +1,9 @@
 use chrono;
 mod input;
 mod api;
-use strum;
+extern crate strum;
+#[macro_use]
+extern crate strum_macros;
 
 #[derive(EnumString, Display)] 
 #[strum(ascii_case_insensitive)]
