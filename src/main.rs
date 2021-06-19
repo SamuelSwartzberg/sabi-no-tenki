@@ -5,9 +5,9 @@ extern crate strum;
 #[macro_use]
 extern crate strum_macros;
 
-#[derive(EnumString, Display)] 
+#[derive(EnumString, Debug, Display)] 
 #[strum(ascii_case_insensitive)]
-enum MetricType{
+pub enum MetricType{
   WeatherType,
   WindSpeed,
   WindDirection,
@@ -39,10 +39,11 @@ enum MetricType{
   ChanceOfThunder
 }
 
-struct ProgOptions{
+#[derive(Debug)]
+pub struct ProgOptions{
   time_list: Vec<chrono::DateTime<chrono::Local>>,
   location_list: Vec<String>,
-  api: Box<dyn api::Query>,
+  // api: Box<dyn api::Query>,
   human_readable: bool,
   significant_figures: i8,
   emoji: bool,
@@ -52,13 +53,13 @@ struct ProgOptions{
   metrics: Vec<MetricType>
 }
 
-struct WeatherItem{ 
+pub struct WeatherItem{ 
   date: chrono::DateTime<chrono::Local>, 
   location: String, 
   metrics: Vec<Metric> 
 } 
 
-struct Metric{
+pub struct Metric{
   type_of: MetricType,
   value: Box<dyn std::fmt::Display>
 }
@@ -72,7 +73,8 @@ fn main() {
 
   // functions returning values should be pure functions, outside of throwing errors
   let _matches = input::get_command_line_input();
-  // let options = input::parse_matches_into_options(matches);
+  let options = input::parse_matches_into_options(_matches);
+  println!("{:?}", options);
   // let request = options.api.build_request(&options);
   // let result = http_request::get_result_from_request(request);
   // cache::cache_result(&result, options.cache_duration);

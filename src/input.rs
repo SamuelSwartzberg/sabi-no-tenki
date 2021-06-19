@@ -150,13 +150,13 @@ fn get_metric_vector(clap_parameter_option: Option<&str>) -> Vec<MetricType>{
     }
     metric_type_vector
   }
-pub fn parse_matches_into_options(clap_matches: clap::ArgMatches) -> ProgOptions{
+pub fn parse_matches_into_options(clap_matches: clap::ArgMatches<'static>) -> ProgOptions{
   let location_list = clap_matches.value_of("location").map_or(Vec::<&str>::new(), |location_list_string| location_list_string.split(":").collect());
   let location_list = location_list.into_iter().map(|item| String::from(item)).collect();
   let time_list = clap_matches.value_of("time").map_or(vec![chrono::Local::now()], |time_string| parse_time(time_string));
   let api = api::get_api(clap_matches.value_of("api").unwrap_or("not sure what we want to do when no api specified")).unwrap(); 
   let human_readable = clap_matches.is_present("human-readable");
-  let significant_figures = clap_matches.value_of("significant_figures").map_or(0,|significant_figure_string| significant_figure_string.parse().unwrap());
+  let significant_figures = clap_matches.value_of("significant-figures").map_or(0,|significant_figure_string| significant_figure_string.parse().unwrap());
   let emoji = clap_matches.is_present("emoji");
   let text = clap_matches.is_present("text");
   let graph = get_metric_vector(clap_matches.value_of("graph"));
@@ -165,7 +165,7 @@ pub fn parse_matches_into_options(clap_matches: clap::ArgMatches) -> ProgOptions
   return ProgOptions{
     location_list,
     time_list,
-    api,
+    // api,
     human_readable,
     significant_figures,
     emoji,
