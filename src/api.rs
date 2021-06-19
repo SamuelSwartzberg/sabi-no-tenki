@@ -1,37 +1,34 @@
-use crate::{ProgOptions, WeatherItem, MetricType};
+// use crate::{ProgOptions, WeatherItem, MetricType};
 // use std::collections::HashMap;
 
 pub trait Query{
-  fn build_request(&self, options: &ProgOptions );
-  fn parse_result(&self) -> Vec<WeatherItem>;
-  fn is_name_of(&self, name: &str) -> bool;
-  fn transform_generic_metric_name_to_api_specific(&self, metrics: &Vec<MetricType>) -> Vec<String>;
+ // fn build_request(&self, options: &ProgOptions );
+ // fn parse_result(&self) -> Vec<WeatherItem>;
+   fn get_names(&self) -> Vec<&str>;
+ // fn transform_generic_metric_name_to_api_specific(&self, metrics: &Vec<MetricType>) -> Vec<String>;
 }
 pub fn get_api( api_name: &str) -> Option<Box<dyn Query>>{
-    let metaweather_query =  MetaweatherQuery{
-        names: ["metaweather", "mw"]
-    };
-    let apis: [Box<dyn Query>] = [metaweather_query];
-    let target_api: Option<Box<dyn Query>> = None;
-    for api in &apis{
-      if api.names.contains(api_name){target_api = api};
+    let metaweather_query =  MetaweatherQuery{};
+    let apis: [Box<dyn Query>; 1] = [Box::new(metaweather_query)];
+    let mut target_api: Option<Box<dyn Query>> = None;
+    for api in apis.into_iter(){
+      if api.get_names().contains(&api_name){target_api = Some(*api)};
     }
-    return Some(target_api);
+    return target_api;
 
 }
 //
 struct MetaweatherQuery{
-  names: [&str],
 //  generic_metric_names_map: HashMap<MetricType, &str>
 }
 //
-//impl Query for MetaweatherQuery{
+impl Query for MetaweatherQuery{
 //  fn build_request(options: &ProgOptions ){};
 //  fn parse_result() -> Vec<WeatherItem>{};
-//  fn is_name_of( name: &str) -> bool{
-//    names.contains(name);
-//  }
-//}
+  fn get_names(&self) -> Vec<&str>{
+    vec!["metaweather", "mw"]     
+  }
+}
 //
 
 //   metaweather, //https://www.metaweather.com/api/#locationsearch

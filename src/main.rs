@@ -71,7 +71,7 @@ fn main() {
   // https://github.com/clap-rs/clap/issues/251
 
   // functions returning values should be pure functions, outside of throwing errors
-  let matches = input::get_command_line_input();
+  let _matches = input::get_command_line_input();
   // let options = input::parse_matches_into_options(matches);
   // let request = options.api.build_request(&options);
   // let result = http_request::get_result_from_request(request);
