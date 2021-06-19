@@ -79,38 +79,55 @@ pub fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remov
     .get_matches();
 }
 fn parse_duration(duration_string: &str) -> Option<chrono::Duration>{
-  let time_string = String::from(duration_string).chars().filter(|c| c.is_digit(10)).collect();
+  let time_string: String = String::from(duration_string).chars().filter(|c| c.is_digit(10)).collect();
   let time: i32 = time_string.parse().unwrap(); 
   if duration_string.ends_with("h") {
-    Some(chrono::Duration::hours(1))
+    Some(chrono::Duration::hours(time))
   } else if duration_string.ends_with("d") { 
-    Some(chrono::Duration::days(1))
+    Some(chrono::Duration::days(time))
   } else {
     None 
-  };
+  }
+}
+
+fn get_step_or_default(putative_step: Option<String>) -> chrono::Duration{
+  putative_step.map_or_else(
+    || {
+      let hour_step = start.contains("h") || stop.contains("h");
+      if hour_step {
+        chrono::Duration::hours(1)
+      } else { 
+        chrono::Duration::days(1)
+      };
+    }, |step_string| parse_duration(step_string).unwrap() )
+}
+
+fn parse_relative_to_current_date_time (duration_string: &str) -> chrono::DateTime<chrono::Local>{
+  chrono::Local::now().check_add_signed(parse_duration(duration_string).unwrap()).unwrap()
 }
 
 fn parse_time(time_string: String) -> Vec<chrono::DateTime<chrono::Utc>>{
   let time_components = time_string.split(":");
-  let start = time_components.next().unwrap();
+  let first_component = time_components.next().unwrap();
   match time_components.next(){
     None => {
-      match parse_duration(start){
-        None => parse_keywords;
-        Some(time) => vec![time]
-    }, Some(stop) => {
-      let step = time_components.next().map_or_else(
-        || {
-          let hour_step = start.contains("h") || stop.contains("h");
-          if hour_step {
-            chrono::Duration::hours(1)
-          } else { 
-            chrono::Duration::days(1)
-          };
-        }, |step_string| parse_duration(step_string).unwrap() 
-        );
+      match parse_duration(first_component){
+        None => parse_keywords(),
+        Some(duration) => vec![chrono::Local::now().check_add_signed(duration).unwrap()]
       }
+    }, Some(stop_string) => {
+      let start = parse_relative_to_current_date_time(first_component);
+      let step = get_step_or_default(time_components.next());
+      let stop = parse_relative_to_current_date_time(stop_string);
+      let current_step: chrono::DateTime<chrono::Local> = start;
+      let return_vec: Vec<chrono::DateTime> = vec![];
+      while (stop > current_step){
+        return_vec.push(current_step);
+        current_step = current_step.check_add_signed(step).unwrap();
+      }
+      return_vec
     }
+  }
 }
 
 fn get_metric_vector(clap_parameter_option: Option<&str>) -> Vec<MetricType>{

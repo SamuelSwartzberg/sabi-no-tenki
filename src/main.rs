@@ -40,7 +40,7 @@ enum MetricType{
 }
 
 struct ProgOptions{
-  time_list: Vec<chrono::DateTime<chrono::Utc>>,
+  time_list: Vec<chrono::DateTime<chrono::Local>>,
   location_list: Vec<String>,
   api: Box<dyn api::Query>,
   human_readable: bool,
@@ -53,7 +53,7 @@ struct ProgOptions{
 }
 
 struct WeatherItem{ 
-  date: chrono::DateTime<chrono::Utc>, 
+  date: chrono::DateTime<chrono::Local>, 
   location: String, 
   metrics: Vec<Metric> 
 } 

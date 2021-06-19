@@ -1,5 +1,5 @@
 use crate::{ProgOptions, WeatherItem, MetricType};
-use std::collections::HashMap;
+// use std::collections::HashMap;
 
 pub trait Query{
   fn build_request(&self, options: &ProgOptions );
@@ -7,17 +7,23 @@ pub trait Query{
   fn is_name_of(&self, name: &str) -> bool;
   fn transform_generic_metric_name_to_api_specific(&self, metrics: &Vec<MetricType>) -> Vec<String>;
 }
-//fn get_api( api_name: &str) -> impl Query{
-//    let metaweather_query =  MetaweatherQuery{
-//        names: vec!["metaweather", "mw"]
-//    };
-//    let apis: [1; impl Query] = [metaweather_query]; 
-//}
+pub fn get_api( api_name: &str) -> Option<Box<dyn Query>>{
+    let metaweather_query =  MetaweatherQuery{
+        names: ["metaweather", "mw"]
+    };
+    let apis: [Box<dyn Query>] = [metaweather_query];
+    let target_api: Option<Box<dyn Query>> = None;
+    for api in &apis{
+      if api.names.contains(api_name){target_api = api};
+    }
+    return Some(target_api);
+
+}
 //
-//struct MetaweatherQuery{
-//  names: Vec<&str>,
+struct MetaweatherQuery{
+  names: [&str],
 //  generic_metric_names_map: HashMap<MetricType, &str>
-//}
+}
 //
 //impl Query for MetaweatherQuery{
 //  fn build_request(options: &ProgOptions ){};
