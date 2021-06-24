@@ -56,13 +56,8 @@ pub struct ProgOptions{
 pub struct WeatherItem{ 
   date: chrono::DateTime<chrono::Local>, 
   location: String, 
-  metrics: Vec<Metric> 
+  metrics: std::collections::HashMap<MetricType, Box<dyn std::fmt::Display>
 } 
-
-pub struct Metric{
-  type_of: MetricType,
-  value: Box<dyn std::fmt::Display>
-}
 
 fn main() {
   // get values from config file, not sure how. It would be nice if we could feed the config file into clap.rs somehow
@@ -80,5 +75,5 @@ fn main() {
   // cache::cache_result(&result, options.cache_duration);
   // let weather_parsed_result = options.api.parse_result(&result);
   // let output = output_generator::generate_output(&weather_parsed_result, &options, get_shell_specs());
-  // println!(output);
+  output.iter.forEach(|line| println!(line));
 }
