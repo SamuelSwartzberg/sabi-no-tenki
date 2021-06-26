@@ -80,6 +80,24 @@ pub fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remov
         .index(1))
     .get_matches();
 }
+
+#[derive(strum_macros::EnumMessage, Debug)]
+#[allow(dead_code)]
+enum ErrorStrings{
+  #[strum(message = "API expected but none provided!")]
+  NoApi,
+  #[strum(message = "The specified API does not exist. Did you specify an extant API, or perhaps misspell the name?")]
+  NoSuchApi,
+  #[strum(message = "Specified number not parsable. Number provides was for ")]
+  NotAParsableNumber,
+  #[strum(message = "The date you specified resulted in a date that is impossible")]
+  NoSuchTime,
+  #[strum(message = "")]
+  TimeFormatError,
+  #[strum(message = "Specified metric does not exist. Metric supplied was ")]
+  NoSuchMetric
+}
+
 fn parse_duration(duration_string: &str) -> Option<chrono::Duration>{
   let time_string: String = String::from(duration_string).chars().filter(|c| c.is_digit(10)).collect();
   let time: i64 = time_string.parse().unwrap(); 
@@ -154,13 +172,13 @@ pub fn parse_matches_into_options(clap_matches: clap::ArgMatches<'static>) -> Pr
   let location_list = clap_matches.value_of("location").map_or(Vec::<&str>::new(), |location_list_string| location_list_string.split(":").collect());
   let location_list = location_list.into_iter().map(|item| String::from(item)).collect();
   let time_list = clap_matches.value_of("time").map_or(vec![chrono::Local::now()], |time_string| parse_time(time_string));
-  let api = api::get_api(clap_matches.value_of("api").unwrap_or("not sure what we want to do when no api specified")).unwrap(); 
+  let api = api::get_api(clap_matches.value_of("api").expect(ErrorStrings.NoApi.get_message().unwrap())).expect(ErrorStrings.NoSuchApi.get_message().unwrap()); 
   let human_readable = clap_matches.is_present("human-readable");
-  let significant_figures = clap_matches.value_of("significant-figures").map_or(0,|significant_figure_string| significant_figure_string.parse().unwrap());
+  let significant_figures = clap_matches.value_of("significant-figures").map_or(0,|significant_figure_string| significant_figure_string.parse().expect(ErrorStrings.NotAParsableNumber.get_message().unwrap() + "significant figures"));
   let emoji = clap_matches.is_present("emoji");
   let text = clap_matches.is_present("text");
   let graph = get_metric_vector(clap_matches.value_of("graph"));
-  let cache_duration = clap_matches.value_of("cache-duration").map_or(chrono::Duration::minutes(60), |cache_duration_string| chrono::Duration::minutes(cache_duration_string.parse().unwrap())); 
+  let cache_duration = clap_matches.value_of("cache-duration").map_or(chrono::Duration::minutes(60), |cache_duration_string| chrono::Duration::minutes(cache_duration_string.parse().expect(ErrorStrings.NotAParsableNumber.get_message().unwrap() +  "cache duration"))); 
   let metrics = get_metric_vector(clap_matches.value_of("metrics"));
   return ProgOptions{
     location_list,

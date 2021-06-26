@@ -1,4 +1,5 @@
 use chrono;
+use terminal_size;
 mod input;
 mod api;
 extern crate strum;
@@ -74,6 +75,6 @@ fn main() {
   // let result = http_request::get_result_from_request(request);
   // cache::cache_result(&result, options.cache_duration);
   // let weather_parsed_result = options.api.parse_result(&result);
-  // let output = output_generator::generate_output(&weather_parsed_result, &options, get_shell_specs());
+  let output = output_generator::generate_output(weather_parsed_result, options, terminal_size::terminal_size().unwrap().0.w);
   output.iter.forEach(|line| println!(line));
 }

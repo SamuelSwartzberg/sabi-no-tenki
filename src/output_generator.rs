@@ -1,8 +1,4 @@
-struct ShellSpecs{ 
-   
-} 
-
-fn reduce_to_significant_figures(){
+fn reduce_to_significant_figures(weather_items: Vec<WeatherItem>) -> Vec<WeatherItem>{
 
   weather_items = weather_items.into_iter.map(|item| {
     for key in item.metrics.keys(){
@@ -13,7 +9,7 @@ fn reduce_to_significant_figures(){
   })
 }
 
-fn to_yaml_string(){
+fn to_yaml_string(weather_items: Vec<WeatherItem>) -> Vec<WeatherItem{
   let weather_map_vec = Vec::new();
   for weather_item in weather_items{
     let weather_item_map = std::collections::HashMap::new();
@@ -49,7 +45,7 @@ fn get_blocks_for_each_line(max_line_length: u16, &output_blocks_vector: Vec<Vec
       line_length_current = 0;
     }
     line_length_current += block_max_size;
-    output_block = output_block.iter().map(|string_item| format!{"{:width$}", string_item, block_max_size}); // pad each item in the block
+    output_block = output_block.iter().map(|string_item| format!{"{:width$}", string_item, width=block_max_size}); // pad each item in the block
     current_line.push(output_block);
   }
   line_vector
@@ -60,10 +56,10 @@ fn put_content_into_lines(line_vector: Vec<Vec<String>>) -> Vec<String>{
 }
 
 fn generate_output(&weather_items: Vec<WeatherItem>, &options: ProgOptions, max_line_length: u16) -> Vec<String>{ 
-  reduce_to_significant_figures();
-  format_weather_type_as_emoji_or_text();
+  weather_items = reduce_to_significant_figures(weather_items);
+  weather_items = format_weather_type_as_emoji_or_text(weather_items);
   if options.human_readable = false{
-    to_yaml_string()
+    to_yaml_string(weather_items)
   } else {
     let output_blocks_vector = build_block_of_output(weather_items);
     let line_vector = get_blocks_for_each_line(max_line_length, output_blocks_vector);
