@@ -49,6 +49,9 @@ pub struct ProgOptions{
   significant_figures: i8,
   emoji: bool,
   text: bool,
+  week_starts_sat: bool,
+  week_starts_sun: bool,
+  labeled_columns: bool,
   graph: Vec<MetricType>,
   cache_duration: chrono::Duration,
   metrics: Vec<MetricType>

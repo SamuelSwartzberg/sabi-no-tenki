@@ -10,6 +10,9 @@ fn get_base_defaults() -> ProgOptions{
     significant_figures: 1,
     emoji: true,
     text: true,
+    week_starts_sat: false,
+    week_starts_sun: false,
+    labeled_columns: false,
     graph: Vec::new(),
     cache_duration: chrono::Duration::hours(1),
     metrics: vec![MetricType::Precipitation, MetricType::TemperatureCur]

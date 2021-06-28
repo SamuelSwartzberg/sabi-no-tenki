@@ -50,6 +50,15 @@ pub fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remov
     .arg(Arg::with_name("text")
         .long("text")
         .help("Show things such as current weather as text (e.g. 'Rainy'). Can be combined with --emoji if both are desired (e.g. '🌧️ Rainy')."))
+    .arg(Arg::with_name("week_starts_sat")
+        .long("week-sat")
+        .help("Week starts Saturday")
+    .arg(Arg::with_name("labeled_columns")
+        .long("labeled-columns")
+        .help("Show the names of the metrics at the beginning of the first column.")
+    .arg(Arg::with_name("week_starts_sun")
+        .long("week-sun")
+        .help("Week starts Sunday")
     .arg(Arg::with_name("time")
         .help("The time span to fetch weather for:
             time = [start[:end][:step]]] | shorthand-values

@@ -1,3 +1,5 @@
+use serde_yaml;
+
 fn reduce_to_significant_figures(weather_items: Vec<WeatherItem>) -> Vec<WeatherItem>{
 
   weather_items = weather_items.into_iter.map(|item| {
