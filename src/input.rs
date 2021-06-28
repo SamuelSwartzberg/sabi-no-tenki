@@ -1,103 +1,10 @@
-use clap::{Arg, App /*, SubCommand*/};
 use crate::{ProgOptions, MetricType};
+use self::{error_strings, command_line, defaults};
 use crate::api;
 use std::str::FromStr;
 
 
-pub fn get_command_line_input() -> clap::ArgMatches<'static>  { //possibly remove static lifetimes once I become clear what the lifetimes of App are
-    return App::new("Sabi no Tenki")
-    .version("0.0")
-    .author("Sam S. <me@samswartzberg.com>")
-    .help("A terminal command line weather client with fine-grained options and a pretentious and possibly incorrect japanese name.")
-    .arg(Arg::with_name("location")
-        .short("l")
-        .long("location")
-        .value_name("LOCATION_LIST")
-        .help("Use the specified location. Best specified in options file for default location. List is separated by colons (:)")
-        .takes_value(true))
-    .arg(Arg::with_name("api")
-        .long("api")
-        .value_name("API")
-        .help("Use specified api. Not all requested metrics are available for all apis.")
-        .takes_value(true))
-    .arg(Arg::with_name("human-readable")
-        .short("h")
-        .long("human-readable")
-        .help("Use human-readable text instead of CSV-like syntax"))
-    .arg(Arg::with_name("ascii-image")
-        .short("a")
-        .long("ascii-image")
-        .help("Include an ascii image for every requested unit"))
-    .arg(Arg::with_name("graph")
-        .short("g")
-        .long("graph")
-        .help("Show an ascii graph for the requested metrics")
-        .value_name("METRICS")
-        .takes_value(true))
-    .arg(Arg::with_name("cache-duration")
-        .long("cache-duration")
-        .help("Specify the duration to cache previous results (in minutes)")
-        .value_name("DURATION")
-        .takes_value(true))
-    .arg(Arg::with_name("significant-figures")
-        .long("significant-figures")
-        .help("give this amount of significant figures (e.g. --significant-figures 1 -> 25.1 C)")
-        .value_name("FIGURES")
-        .takes_value(true))
-    .arg(Arg::with_name("metrics")
-        .long("metrics")
-        .help("Specify a list of metrics you would like to recieve, as a non-spaced comma-separated list. Not all requested metrics are available for all apis.")
-        .value_name("METRIC-LIST")
-        .takes_value(true))
-    .arg(Arg::with_name("emoji")
-        .long("emoji")
-        .help("Show things such as current weather as emoji (e.g. '🌧️'). Can be combined with --text if both are desired (e.g. '🌧️ Rainy')."))
-    .arg(Arg::with_name("text")
-        .long("text")
-        .help("Show things such as current weather as text (e.g. 'Rainy'). Can be combined with --emoji if both are desired (e.g. '🌧️ Rainy')."))
-    .arg(Arg::with_name("time")
-        .help("The time span to fetch weather for:
-            time = [start[:end][:step]]] | shorthand-values
-            start = time-value
-            end = time-value
-            step = time-value
-            time-value = time,unit
-            time = 0...23
-            unit = 'd'|'h'
-            shorthand-values = 'today'|'week'|'weekend'|'next-week'
-
-            no value - now
-            1h - in one hour
-            5d - in 5 days
-            2w - in two weeks
-            1h:10h - in the 9 hours starting one hour from now
-            1h:10h:3h - in the in the 9 hours starting one hour from now every three hours
-            :6d:2d - in the next six days, every second day
-
-
-            Leaving out step is usually fine - if you specify a h value for any of the values, 
-            it will presume hour-based stepping, otherwise it will presume day-based stepping.")
-        .index(1))
-    .get_matches();
 }
-
-#[derive(strum_macros::EnumMessage, Debug)]
-#[allow(dead_code)]
-enum ErrorStrings{
-  #[strum(message = "API expected but none provided!")]
-  NoApi,
-  #[strum(message = "The specified API does not exist. Did you specify an extant API, or perhaps misspell the name?")]
-  NoSuchApi,
-  #[strum(message = "Specified number not parsable. Number provides was for ")]
-  NotAParsableNumber,
-  #[strum(message = "The date you specified resulted in a date that is impossible")]
-  NoSuchTime,
-  #[strum(message = "")]
-  TimeFormatError,
-  #[strum(message = "Specified metric does not exist. Metric supplied was ")]
-  NoSuchMetric
-}
-
 fn parse_duration(duration_string: &str) -> Option<chrono::Duration>{
   let time_string: String = String::from(duration_string).chars().filter(|c| c.is_digit(10)).collect();
   let time: i64 = time_string.parse().unwrap(); 
@@ -126,13 +33,26 @@ fn parse_relative_to_current_date_time (duration_string: &str) -> chrono::DateTi
   chrono::Local::now().checked_add_signed(parse_duration(duration_string).unwrap()).unwrap()
 }
 
+fn get_vec_of_days(start: chrono::DateTime<chrono::Local>, end: chrono::DateTime<chrono::Local>) -> Vec<chrono::DateTime<chrono::Local>>{
+  let mut week_vec = vec![];
+  let mut current_day = start;
+  while current_day != end {
+    week_vec.push(current_day);
+    current_day = current_day.check_add_signed(chrono::Duration::days(1)).unwrap();
+  }
+  week_vec
+}
+fn get_date_based_on_weekday(weekday: chrono::Weekday, week_offset: u8) -> chrono::DateTime<chrono::Local>{
+  chrono::Local.from_local_datetime(NaiveDate::from_isoywd(chrono::offset::Local::now().year(), chrono::offset::Local::now().week() + week_offset, weekday)
+}
 fn parse_keywords(keyword_string: &str) ->  Vec<chrono::DateTime<chrono::Local>>{
   match keyword_string {
     "today" => vec![chrono::Local::now()],
     &_ => vec![]
-   // "week",
-   // "weekend",
-   // "next week"
+    "week" => get_vec_of_days(chrono::Local::now(), get_date_based_on_weekday(chrono::Weekday::Sun, 0),
+    "weekend" => get_vec_of_days(get_date_based_on_weekday(chrono::Weekday::Sat, 0), get_date_based_on_weekday(chrono::Weekday::Sat, 0).check_add_signed(chrono::Duration::days(1).unwrap()))
+    "next week" => get_vec_of_days(get_date_based_on_weekday(chrono::Weekday::Mon, 1), get_date_based_on_weekday(chrono::Weekday::Mon, 1).check_add_signed(chrono::Duration::days(6).unwrap()))
+     &_ => panic!(error_strings.NoSuchDateString) 
   }
 }
 
