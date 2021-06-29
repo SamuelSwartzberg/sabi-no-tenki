@@ -36,6 +36,16 @@ impl Query for MetaweatherQuery{
 //   metaweather, //https://www.metaweather.com/api/#locationsearch
 //  Weather-related response fields
 // weather_state_name
+  // Snow
+  // Sleet
+  // Hail
+  // Thunderstorm
+  // Heavy Rain
+  // Light Rain
+  // Showers
+  // Heavy Cloud
+  // Light Cloud
+  // Clear
 // weather_state_abbr
 // wind_speed	
 // wind_direction	
@@ -79,6 +89,25 @@ impl Query for MetaweatherQuery{
 //   troposphere //https://www.troposphere.io/developer
 // response fields
 // type	Weather type
+  // clear
+  // partly-cloudy
+  // cloudy
+  // dust
+  // mist
+  // fog 
+  // rain
+  // snow
+  // sandstorm
+  // snowdrifting
+  // drizzle
+  // rain-freezing
+  // sleet
+  // rain-snow
+  // rain-snow-shower
+  // snow-shower
+  // snow-hail
+  // hail
+  // thunderstorm
 // temperature	Current temperature in °C
 // temperatureMin	Minimum temperature in °C
 // temperatureMax	Maximum temperature in °C

@@ -5,10 +5,14 @@ fn reduce_to_significant_figures(weather_items: Vec<WeatherItem>) -> Vec<Weather
   weather_items = weather_items.into_iter.map(|item| {
     for key in item.metrics.keys(){
       let val = item.metrics.get(key);
-      // get items down to significant figures
+      item.metrics.set(key, (val * 100.0).round() / 100.0);
     }
     item
   })
+}
+
+fn format_weather_type_as_emoji_or_text(weather_items: Vec<WeatherItem>) -> Vec<WeatherItem> {
+  weather_items.into_iter.map(|item| item.get(MetricType::WeatherType)
 }
 
 fn to_yaml_string(weather_items: Vec<WeatherItem>) -> Vec<WeatherItem{
