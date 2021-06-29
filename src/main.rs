@@ -40,44 +40,45 @@ pub enum MetricType{
   ChanceOfThunder
 }
 
-pub enum WeatherType{
-  #[strum(message="☀️", detailed_message="clear")]
-  Clear,
-  #[strum(message="⛅", detailed_message="partially cloudy")]
-  PartlyCloudy,
-  #[strum(message="☁️", detailed_message="cloudy")]
-  Cloudy,
-  #[strum(message="💨", detailed_message="dust")]
-  Dust,
-  #[strum(message="🌁", detailed_message="mist")]
-  Mist,
-  #[strum(message="🌫️", detailed_message="fog")]
-  Fog,
-  #[strum(message="🌧️", detailed_message=rain"")]
-  Rain,
-  #[strum(message="🌨️", detailed_message=snow"")]
-  Snow,
-  #[strum(message="🌨️🏃", detailed_message=snow showers"")]
-  SnowShower,
-  #[strum(message="", detailed_message="darude - sandstorm")]
-  Sandstorm,
-  #[strum(message="🌧️🌨️", detailed_messagerain and snow="")]
+pub enum WeatherType{    
+  #[strum(message="☀️", detailed_message="clear")]    
+  Clear,    
+  #[strum(message="⛅", detailed_message="partially cloudy")]    
+  PartlyCloudy,    
+  #[strum(message="☁️", detailed_message="cloudy")]    
+  Cloudy,    
+  #[strum(message="💨", detailed_message="dust")]    
+  Dust,    
+  #[strum(message="🌁", detailed_message="mist")]    
+  Mist,    
+  #[strum(message="🌫️", detailed_message="fog")]    
+  Fog,    
+  #[strum(message="🌧️", detailed_message="rain")]    
+  Rain,    
+  #[strum(message="🌨️", detailed_message="snow")]    
+  Snow,    
+  #[strum(message="🌨️🏃", detailed_message="snow showers")]      
+  SnowShower,    
+  #[strum(message="", detailed_message="darude - sandstorm")]    
+  Sandstorm,                                                                          
+  #[strum(message="🌧️🌨️", detailed_message="rain and snow")]     
   RainSnow,
-  #[strum(message="🌧️🌨️🏃", detailed_messagerain and snow showers="")]
-  RainSnowShower,
-  #[strum(message="💦", detailed_message="drizzle")]
-  LightRain, //also drizzle
-  #[strum(message="🌧️🏃", detailed_message=rain showers"")]
-  RainShower,
-  #[strum(message="💧❄️", detailed_message="sleet")]
-  Sleet,
-  #[strum(message="❄️🌧️", detailed_message=freezing rain"")]
-  FreezingRain,
-  #[strum(message="🤕❄️", detailed_message="hail")]
-  Hail,
-  #[strum(message="🌩️", detailed_message="thunderstorm")]
-  Thunderstorms 
-}
+  #[strum(message="🌧️🌨️🏃", detailed_message="rain and snow showers")]                                                         
+  RainSnowShower,    
+  #[strum(message="💦", detailed_message="drizzle")]                                                                       
+  LightRain, //also drizzle    
+  #[strum(message="🌧️🏃", detailed_message=rain showers")]  
+  RainShower,    
+  #[strum(message="💧❄️", detailed_message="sleet")]    
+  Sleet,  
+  #[strum(message="❄️🌧️", detailed_message=freezing rain")]   
+  FreezingRain,    
+  #[strum(message="🤕❄️", detailed_message="hail")]    
+  Hail,    
+  #[strum(message="🌩️", detailed_message="thunderstorm")]                                                                    
+  Thunderstorms     
+}    
+
 #[derive(Debug)]
 pub struct ProgOptions{
   time_list: Vec<chrono::DateTime<chrono::Local>>,
