@@ -5,7 +5,7 @@ use chrono;
 pub struct WeatherItem{ 
   date: chrono::DateTime<chrono::Local>, 
   location: String, 
-  metrics: std::collections::HashMap<MetricType, Box<dyn std::fmt::Display>
+  metrics: std::collections::HashMap<MetricType, Box<dyn std::fmt::Display>>
 } 
     
 #[derive(EnumString, Debug, Display)] 
