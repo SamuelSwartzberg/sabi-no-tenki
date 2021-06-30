@@ -39,6 +39,5 @@ fn main() {
   };
   // let request = options.api.build_request(&options);
   // let result = http_request::get_result_from_request(request);
-  // cache::cache_result(&result, options.cache_duration);
   // let weather_parsed_result = options.api.parse_result(&result);
 }
