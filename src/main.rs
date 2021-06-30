@@ -68,11 +68,11 @@ pub enum WeatherType{
   RainSnowShower,    
   #[strum(message="💦", detailed_message="drizzle")]                                                                       
   LightRain, //also drizzle    
-  #[strum(message="🌧️🏃", detailed_message=rain showers")]  
+  #[strum(message="🌧️🏃", detailed_message="rain showers")]  
   RainShower,    
   #[strum(message="💧❄️", detailed_message="sleet")]    
   Sleet,  
-  #[strum(message="❄️🌧️", detailed_message=freezing rain")]   
+  #[strum(message="❄️🌧️", detailed_message="freezing rain")]   
   FreezingRain,    
   #[strum(message="🤕❄️", detailed_message="hail")]    
   Hail,    
