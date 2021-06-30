@@ -40,6 +40,7 @@ pub enum MetricType{
   ChanceOfThunder
 }
 
+#[derive(EnumMessage)]
 pub enum WeatherType{    
   #[strum(message="☀️", detailed_message="clear")]    
   Clear,    
@@ -78,7 +79,14 @@ pub enum WeatherType{
   #[strum(message="🌩️", detailed_message="thunderstorm")]                                                                    
   Thunderstorms     
 }    
-
+impl<T: EnumMessage> WeatherType<T>{
+  get_relevant_message(&self, detailed: bool) -> Option<&'static str>{
+    match detailed{
+      true => self.get_detailed_message(),
+      false => self.get_message()
+    }
+  }
+}
 #[derive(Debug)]
 pub struct ProgOptions{
   time_list: Vec<chrono::DateTime<chrono::Local>>,
@@ -103,12 +111,6 @@ pub struct WeatherItem{
 } 
 
 fn main() {
-  // get values from config file, not sure how. It would be nice if we could feed the config file into clap.rs somehow
-  // github issuses mentioning this:
-  // https://github.com/clap-rs/clap/issues/1693
-  // https://github.com/clap-rs/clap/issues/748
-  // https://github.com/clap-rs/clap/issues/251
-
   // functions returning values should be pure functions, outside of throwing errors
   let _matches = input::get_command_line_input();
   let options = input::parse_matches_into_options(_matches);

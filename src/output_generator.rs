@@ -12,7 +12,10 @@ fn reduce_to_significant_figures(weather_items: Vec<WeatherItem>) -> Vec<Weather
 }
 
 fn format_weather_type_as_emoji_or_text(weather_items: Vec<WeatherItem>) -> Vec<WeatherItem> {
-  weather_items.into_iter.map(|item| item.get(MetricType::WeatherType)
+  weather_items.into_iter.map(|item| {
+    let weather_type = item.get(MetricType::WeatherType);
+    item.set(MetricType::WeatherType, weather_type.get_relevant_message.unwrap())
+  }
 }
 
 fn to_yaml_string(weather_items: Vec<WeatherItem>) -> Vec<WeatherItem{
