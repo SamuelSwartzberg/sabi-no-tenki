@@ -81,3 +81,12 @@ pub enum WeatherType{
   #[strum(message="🌩️", detailed_message="thunderstorm")]                                                                    
   Thunderstorms     
 } 
+
+impl<T: EnumMessage> WeatherType<T>{
+  get_relevant_message(&self, detailed: bool) -> Option<&'static str>{
+    match detailed{
+      true => self.get_detailed_message(),
+      false => self.get_message()
+    }
+  }
+}
