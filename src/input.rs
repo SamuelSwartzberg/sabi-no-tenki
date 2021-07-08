@@ -21,11 +21,9 @@ fn replace_with_config(config: ConfigView, options: &mut ProgOptions){
   if let Some(res) = config.value_of("metrics") {options.metrics = parse_metric_vector(res)};
 }
 fn replace_with_arguments(clap_matches: clap::ArgMatches<'static>, options: &mut ProgOptions){
-  println!("{}", "in replace with args");
   let bool_flags = check_clap_boolean_flags(["emoji", "text", "human_readable", "week_starts_sat", "week_starts_sun", "labeled_columns"], &clap_matches);
   options.emoji = bool_flags[0]; options.text = bool_flags[1]; options.human_readable = bool_flags[2]; options.week_starts_sat = bool_flags[3]; options.week_starts_sun = bool_flags[4]; options.labeled_columns = bool_flags[5];
-
-  if let Some(res) = clap_matches.value_of("location_list").map(String::from) {options.location_list = parse_location_list(res)};
+  if let Some(res) = clap_matches.value_of("location_list").map(String::from) { options.location_list = parse_location_list(res)};
   if let Some(res) = clap_matches.value_of("time_list").map(String::from) {options.time_list = parse_time(res)};
   if let Some(res) = clap_matches.value_of("significant_figures").map(String::from) {options.significant_figures = parse_significant_figures(res)};
   if let Some(res) = clap_matches.value_of("graph").map(String::from) {options.graph = parse_metric_vector(res)};

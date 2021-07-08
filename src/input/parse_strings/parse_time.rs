@@ -1,16 +1,22 @@
 use chrono;
 use chrono::{TimeZone, Datelike};
 use crate::input::error_strings::ErrorStrings;
+use strum::EnumMessage;
 
 fn parse_duration(duration_string: &str) -> Option<chrono::Duration>{
   let time_string: String = String::from(duration_string).chars().filter(|c| c.is_digit(10)).collect();
-  let time: i64 = time_string.parse().unwrap(); 
-  if duration_string.ends_with("h") {
-    Some(chrono::Duration::hours(time))
-  } else if duration_string.ends_with("d") { 
-    Some(chrono::Duration::days(time))
-  } else {
-    None 
+  let time: i64 = 0;  
+  match time_string.parse::<i64>().ok() {
+    Some(time) => {
+      if duration_string.ends_with("h") {
+        Some(chrono::Duration::hours(time))
+      } else if duration_string.ends_with("d") { 
+        Some(chrono::Duration::days(time))
+      } else {
+        None 
+      }
+    }
+    None =>  None
   }
 }
 
@@ -40,6 +46,7 @@ fn parse_relative_to_current_date_time (duration_string: &str) -> chrono::DateTi
 fn get_vec_of_days(start: chrono::Date<chrono::Local>, end: chrono::Date<chrono::Local>) -> Vec<chrono::DateTime<chrono::Local>>{
   let mut week_vec = vec![];
   let mut current_day = start;
+  if start.and_hms(0,0,0).timestamp() > end.and_hms(0,0,0).timestamp() {panic!("Start in range of time cannot be after end, will cause infinite loop.")};
   while current_day != end {
     week_vec.push(add_magic_number(current_day));
     current_day = current_day.checked_add_signed(chrono::Duration::days(1)).unwrap();
@@ -58,19 +65,19 @@ fn get_date_based_on_weekday(weekday: chrono::Weekday, week_offset: u32) -> chro
 fn parse_keywords(keyword_string: &str) ->  Vec<chrono::DateTime<chrono::Local>>{
   match keyword_string {
     "today" => vec![add_magic_number(chrono::Local::today())],
-    "week" => get_vec_of_days(
+    "week" | "this week" => get_vec_of_days(
       chrono::Local::today(), 
-      get_date_based_on_weekday(chrono::Weekday::Sun, 0)
+      get_date_based_on_weekday(chrono::Weekday::Sun, 0).checked_add_signed(chrono::Duration::days(1)).unwrap() // just specifying monday allows us to travel back in time and create an infinite loop so
     ),
-    "weekend" => get_vec_of_days(
+    "weekend" | "this weekend" => get_vec_of_days(
       get_date_based_on_weekday(chrono::Weekday::Sat, 0), 
-      get_date_based_on_weekday(chrono::Weekday::Sat, 0).checked_add_signed(chrono::Duration::days(1)).unwrap()
+      get_date_based_on_weekday(chrono::Weekday::Sat, 0).checked_add_signed(chrono::Duration::days(2)).unwrap()
     ),
     "next week" => get_vec_of_days(
       get_date_based_on_weekday(chrono::Weekday::Mon, 1), 
-      get_date_based_on_weekday(chrono::Weekday::Mon, 1).checked_add_signed(chrono::Duration::days(6)).unwrap()
+      get_date_based_on_weekday(chrono::Weekday::Mon, 1).checked_add_signed(chrono::Duration::days(7)).unwrap()
     ),
-    &_ => panic!(ErrorStrings::NoSuchDateString) 
+    &_ => panic!(ErrorStrings::NoSuchDateString.get_message().unwrap()) 
   }
 }
 
