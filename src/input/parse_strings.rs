@@ -17,7 +17,7 @@ pub fn parse_metric_vector(metric_string: String) -> Vec<MetricType>{
 }
 
 pub fn parse_location_list(location_list_string: String) -> Vec<String>{
-  location_list_string.split(":").collect().into_iter().map(|item| String::from(item)).collect();
+  location_list_string.split(":").collect::<Vec<&str>>().into_iter().map(|item| String::from(item)).collect()
 }
 pub fn parse_significant_figures(significant_figure_string: String) -> u8{
   significant_figure_string.parse().expect(ErrorStrings::NotAParsableNumber.get_message().unwrap() + "significant figures")

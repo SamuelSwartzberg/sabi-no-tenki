@@ -9,10 +9,6 @@ mod prog_options;
 
 // use terminal_size;
 
-extern crate strum;
-#[macro_use]
-extern crate strum_macros;
-
 
 
 fn main() {

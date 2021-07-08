@@ -1,4 +1,5 @@
 use chrono;
+use chrono::{TimeZone, Datelike};
 use crate::input::error_strings::ErrorStrings;
 
 fn parse_duration(duration_string: &str) -> Option<chrono::Duration>{
@@ -34,7 +35,7 @@ fn get_vec_of_days(start: chrono::DateTime<chrono::Local>, end: chrono::DateTime
   let mut current_day = start;
   while current_day != end {
     week_vec.push(current_day);
-    current_day = current_day.check_add_signed(chrono::Duration::days(1)).unwrap();
+    current_day = current_day.checked_add_signed(chrono::Duration::days(1)).unwrap();
   }
   week_vec
 }
@@ -45,8 +46,8 @@ fn parse_keywords(keyword_string: &str) ->  Vec<chrono::DateTime<chrono::Local>>
   match keyword_string {
     "today" => vec![chrono::Local::now()],
     "week" => get_vec_of_days(chrono::Local::now(), get_date_based_on_weekday(chrono::Weekday::Sun, 0)),
-    "weekend" => get_vec_of_days(get_date_based_on_weekday(chrono::Weekday::Sat, 0), get_date_based_on_weekday(chrono::Weekday::Sat, 0).check_add_signed(chrono::Duration::days(1).unwrap())),
-    "next week" => get_vec_of_days(get_date_based_on_weekday(chrono::Weekday::Mon, 1), get_date_based_on_weekday(chrono::Weekday::Mon, 1).check_add_signed(chrono::Duration::days(6).unwrap())),
+    "weekend" => get_vec_of_days(get_date_based_on_weekday(chrono::Weekday::Sat, 0), get_date_based_on_weekday(chrono::Weekday::Sat, 0).checked_add_signed(chrono::Duration::days(1).unwrap())),
+    "next week" => get_vec_of_days(get_date_based_on_weekday(chrono::Weekday::Mon, 1), get_date_based_on_weekday(chrono::Weekday::Mon, 1).checked_add_signed(chrono::Duration::days(6).unwrap())),
       &_ => panic!(ErrorStrings::NoSuchDateString) 
   }
 }
