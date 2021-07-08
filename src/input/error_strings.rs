@@ -2,7 +2,7 @@
 
 #[derive(strum_macros::EnumMessage, Debug)]
 #[allow(dead_code)]
-enum ErrorStrings{
+pub enum ErrorStrings{
   #[strum(message = "API expected but none provided!")]
   NoApi,
   #[strum(message = "The specified API does not exist. Did you specify an extant API, or perhaps misspell the name?")]
@@ -17,3 +17,4 @@ enum ErrorStrings{
   TimeFormatError,
   #[strum(message = "Specified metric does not exist. Metric supplied was ")]
   NoSuchMetric
+}

@@ -3,14 +3,13 @@ mod defaults;
 mod error_strings;
 mod parse_strings;
 
-use error_strings::ErrorStrings;
 use crate::prog_options::ProgOptions;
-use crate::api;
-use parse_strings::*;
-use std::str::FromStr;
+// use crate::api;
+use parse_strings::{parse_location_list, parse_time, parse_metric_vector, parse_significant_figures, parse_cache_duration};
+use config::ConfigView;
 
-fn check_clap_boolean_flags(flag_names: [&str; 4], &mut clap_matches: clap::ArgMatches<'static>) -> [bool; 4]{
-  flag_names.into_iter.map(|flag_name| clap_matches.is_present(flag_name));
+fn check_clap_boolean_flags(flag_names: [&str; 4], clap_matches: &mut clap::ArgMatches<'static>) -> [bool; 4]{
+  flag_names.into_iter().map(|flag_name| clap_matches.is_present(flag_name));
 }
 
 fn replace_with_config(config: ConfigView, options: ProgOptions) -> ProgOptions{
@@ -32,7 +31,7 @@ fn replace_with_arguments(clap_matches: clap::ArgMatches<'static>, options: Prog
   options.cache_duration = clap_matches.value_of("cache_duration").map_or(options.cache_duration, parse_cache_duration); 
   options.metrics = clap_matches.value_of("metrics").map_or(options.metrics, parse_metric_vector);
 
-  options.api =  clap_matches.value_of("api").map_or(options.api, |api_str| api::get_api(api_str).expect(ErrorStrings.NoSuchApi.get_message().unwrap())); 
+  //options.api =  clap_matches.value_of("api").map_or(options.api, |api_str| api::get_api(api_str).expect(ErrorStrings::NoSuchApi.get_message().unwrap())); 
 
 }
 

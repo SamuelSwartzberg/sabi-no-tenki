@@ -1,10 +1,11 @@
-use crate::{ProgOptions, MetricType};
+use crate::prog_options::ProgOptions;
+use crate::weather_items::MetricType;
 use chrono;
 
-fn get_base_defaults() -> ProgOptions{
+pub fn get_base_defaults() -> ProgOptions{
   ProgOptions{
     time_list: vec![chrono::Local::now()],
-    location_list: vec!["Tokyo"],
+    location_list: vec![String::from("Tokyo")],
     // api: Box<dyn api::Query>,
     human_readable: true,
     significant_figures: 1,
