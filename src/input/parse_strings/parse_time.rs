@@ -27,29 +27,55 @@ fn get_step_or_default(putative_step: Option<&str>, start_string: &str, stop_str
 }
 
 fn parse_relative_to_current_date_time (duration_string: &str) -> chrono::DateTime<chrono::Local>{
-  chrono::Local::now().checked_add_signed(parse_duration(duration_string).unwrap()).unwrap()
+  let duration = parse_duration(duration_string).unwrap();
+  // hacky checking if duration is a day, will fail if person entered 24h and expected it to be hour, not day-based, but well
+  if duration.num_seconds() % chrono::Duration::days(1).num_seconds() == 0 {
+    add_magic_number(chrono::Local::today()).checked_add_signed(duration).unwrap()
+  } else{
+    chrono::Local::now().checked_add_signed(duration).unwrap()
+  }
+  
 }
 
-fn get_vec_of_days(start: chrono::DateTime<chrono::Local>, end: chrono::DateTime<chrono::Local>) -> Vec<chrono::DateTime<chrono::Local>>{
+fn get_vec_of_days(start: chrono::Date<chrono::Local>, end: chrono::Date<chrono::Local>) -> Vec<chrono::DateTime<chrono::Local>>{
   let mut week_vec = vec![];
   let mut current_day = start;
   while current_day != end {
-    week_vec.push(current_day);
+    week_vec.push(add_magic_number(current_day));
     current_day = current_day.checked_add_signed(chrono::Duration::days(1)).unwrap();
   }
   week_vec
 }
-fn get_date_based_on_weekday(weekday: chrono::Weekday, week_offset: u8) -> chrono::DateTime<chrono::Local>{
-  chrono::Local.from_local_datetime(chrono::NaiveDate::from_isoywd(chrono::offset::Local::now().year(), chrono::offset::Local::now().week() + week_offset, weekday))
+fn get_date_based_on_weekday(weekday: chrono::Weekday, week_offset: u32) -> chrono::Date<chrono::Local>{
+  chrono::Local.from_local_date(
+    &chrono::NaiveDate::from_isoywd(
+      chrono::offset::Local::now().year(), 
+      chrono::offset::Local::now().iso_week().week() + week_offset, 
+      weekday
+    )
+  ).unwrap()
 }
 fn parse_keywords(keyword_string: &str) ->  Vec<chrono::DateTime<chrono::Local>>{
   match keyword_string {
-    "today" => vec![chrono::Local::now()],
-    "week" => get_vec_of_days(chrono::Local::now(), get_date_based_on_weekday(chrono::Weekday::Sun, 0)),
-    "weekend" => get_vec_of_days(get_date_based_on_weekday(chrono::Weekday::Sat, 0), get_date_based_on_weekday(chrono::Weekday::Sat, 0).checked_add_signed(chrono::Duration::days(1).unwrap())),
-    "next week" => get_vec_of_days(get_date_based_on_weekday(chrono::Weekday::Mon, 1), get_date_based_on_weekday(chrono::Weekday::Mon, 1).checked_add_signed(chrono::Duration::days(6).unwrap())),
-      &_ => panic!(ErrorStrings::NoSuchDateString) 
+    "today" => vec![add_magic_number(chrono::Local::today())],
+    "week" => get_vec_of_days(
+      chrono::Local::today(), 
+      get_date_based_on_weekday(chrono::Weekday::Sun, 0)
+    ),
+    "weekend" => get_vec_of_days(
+      get_date_based_on_weekday(chrono::Weekday::Sat, 0), 
+      get_date_based_on_weekday(chrono::Weekday::Sat, 0).checked_add_signed(chrono::Duration::days(1)).unwrap()
+    ),
+    "next week" => get_vec_of_days(
+      get_date_based_on_weekday(chrono::Weekday::Mon, 1), 
+      get_date_based_on_weekday(chrono::Weekday::Mon, 1).checked_add_signed(chrono::Duration::days(6)).unwrap()
+    ),
+    &_ => panic!(ErrorStrings::NoSuchDateString) 
   }
+}
+
+fn add_magic_number(date: chrono::Date<chrono::Local>) -> chrono::DateTime<chrono::Local>{
+  date.and_hms_milli(0,0,39, 511)
 }
 
 pub fn parse_time(time_string: String) -> Vec<chrono::DateTime<chrono::Local>>{

@@ -2,6 +2,7 @@ mod parse_time;
 
 use crate::weather_items::MetricType;
 use super::error_strings::ErrorStrings;
+use strum::EnumMessage;
 pub use parse_time::parse_time as parse_time;
 use chrono;
 use std::str::FromStr;
@@ -20,8 +21,8 @@ pub fn parse_location_list(location_list_string: String) -> Vec<String>{
   location_list_string.split(":").collect::<Vec<&str>>().into_iter().map(|item| String::from(item)).collect()
 }
 pub fn parse_significant_figures(significant_figure_string: String) -> u8{
-  significant_figure_string.parse().expect(ErrorStrings::NotAParsableNumber.get_message().unwrap() + "significant figures")
+  significant_figure_string.parse().expect(&(ErrorStrings::NotAParsableNumber.get_message().unwrap().to_owned() + "significant figures"))
 }
 pub fn parse_cache_duration(cache_duration_string: String)-> chrono::Duration{
-  chrono::Duration::minutes(cache_duration_string.parse().expect(ErrorStrings::NotAParsableNumber.get_message().unwrap() +  "cache duration"))
+  chrono::Duration::minutes(cache_duration_string.parse().expect(&(ErrorStrings::NotAParsableNumber.get_message().unwrap().to_owned() +  "cache duration")))
 }
