@@ -1,27 +1,18 @@
-use chrono;
-use terminal_size;
 mod input;
 mod api;
+mod weather_item;
+mod command_line;
+mod prog_options;
+mod cache;
+mod 
+
+use terminal_size;
+
 extern crate strum;
 #[macro_use]
 extern crate strum_macros;
 
-#[derive(Debug)]
-pub struct ProgOptions{
-  time_list: Vec<chrono::DateTime<chrono::Local>>,
-  location_list: Vec<String>,
-  // api: Box<dyn api::Query>,
-  human_readable: bool,
-  significant_figures: i8,
-  emoji: bool,
-  text: bool,
-  week_starts_sat: bool,
-  week_starts_sun: bool,
-  labeled_columns: bool,
-  graph: Vec<MetricType>,
-  cache_duration: chrono::Duration,
-  metrics: Vec<MetricType>
-}
+
 
 fn main() {
   // functions returning values should be pure functions, outside of throwing errors

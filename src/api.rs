@@ -3,7 +3,7 @@
 
 // use crate::{ProgOptions, WeatherItem, MetricType};
 // use std::collections::HashMap;
-use self::metaweather_query;
+pub mod metaweather_query;
 
 pub trait Query{
  // fn build_request(&self, options: &ProgOptions );

@@ -23,6 +23,7 @@
 // visibility
 // predictability	
 
+#[derive(Debug)]
 struct MetaweatherQuery{
 //  generic_metric_names_map: HashMap<MetricType, &str>
 }

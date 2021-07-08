@@ -1,14 +1,16 @@
 use strum;
-use strum_macros;
+use strum::EnumMessage;
+use strum_macros::EnumString;
 use chrono;
 
+#[derive(Debug)]
 pub struct WeatherItem{ 
   date: chrono::DateTime<chrono::Local>, 
   location: String, 
   metrics: std::collections::HashMap<MetricType, Box<dyn std::fmt::Display>
 } 
     
-#[derive(EnumString, Debug, Display)] 
+#[derive(EnumString, Debug )] 
 #[strum(ascii_case_insensitive)]
 pub enum MetricType{
   WeatherType,
@@ -42,7 +44,7 @@ pub enum MetricType{
   ChanceOfThunder
 }
 
-#[derive(EnumMessage)]
+#[derive(EnumMessage, Debug)]
 pub enum WeatherType{    
   #[strum(message="☀️", detailed_message="clear")]    
   Clear,    
@@ -82,7 +84,7 @@ pub enum WeatherType{
   Thunderstorms     
 } 
 
-impl<T: EnumMessage> WeatherType<T>{
+impl WeatherType{
   get_relevant_message(&self, detailed: bool) -> Option<&'static str>{
     match detailed{
       true => self.get_detailed_message(),
