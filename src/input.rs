@@ -13,24 +13,24 @@ fn check_clap_boolean_flags(flag_names: [&str; 6], clap_matches: &clap::ArgMatch
 }
 
 fn replace_with_config(config: ConfigView, options: &mut ProgOptions){
-  options.location_list = config.value_of("location_list").map_or(options.location_list, parse_location_list);
-  options.time_list = config.value_of("time_list").map_or(options.time_list, parse_time);
-  options.significant_figures = config.value_of("significant_figures").map_or(options.significant_figures, parse_significant_figures);
-  options.graph = config.value_of("graph").map_or(options.graph, parse_metric_vector);
-  options.cache_duration = config.value_of("cache_duration").map_or(options.cache_duration, parse_cache_duration); 
-  options.metrics = config.value_of("metrics").map_or(options.metrics, parse_metric_vector);
+  if let Some(res) = config.value_of("location_list") {options.location_list = parse_location_list(res)};
+  if let Some(res) = config.value_of("time_list") {options.time_list = parse_time(res)};
+  if let Some(res) = config.value_of("significant_figures") {options.significant_figures = parse_significant_figures(res)};
+  if let Some(res) = config.value_of("graph") {options.graph = parse_metric_vector(res)};
+  if let Some(res) = config.value_of("cache_duration") {options.cache_duration = parse_cache_duration(res)}; 
+  if let Some(res) = config.value_of("metrics") {options.metrics = parse_metric_vector(res)};
 }
 fn replace_with_arguments(clap_matches: clap::ArgMatches<'static>, options: &mut ProgOptions){
-
+  println!("{}", "in replace with args");
   let bool_flags = check_clap_boolean_flags(["emoji", "text", "human_readable", "week_starts_sat", "week_starts_sun", "labeled_columns"], &clap_matches);
   options.emoji = bool_flags[0]; options.text = bool_flags[1]; options.human_readable = bool_flags[2]; options.week_starts_sat = bool_flags[3]; options.week_starts_sun = bool_flags[4]; options.labeled_columns = bool_flags[5];
 
-  options.location_list = clap_matches.value_of("location_list").map(String::from).map_or(options.location_list, parse_location_list);
-  options.time_list = clap_matches.value_of("time_list").map(String::from).map_or(options.time_list, parse_time);
-  options.significant_figures = clap_matches.value_of("significant_figures").map(String::from).map_or(options.significant_figures, parse_significant_figures);
-  options.graph = clap_matches.value_of("graph").map(String::from).map_or(options.graph, parse_metric_vector);
-  options.cache_duration = clap_matches.value_of("cache_duration").map(String::from).map_or(options.cache_duration, parse_cache_duration); 
-  options.metrics = clap_matches.value_of("metrics").map(String::from).map_or(options.metrics, parse_metric_vector);
+  if let Some(res) = clap_matches.value_of("location_list").map(String::from) {options.location_list = parse_location_list(res)};
+  if let Some(res) = clap_matches.value_of("time_list").map(String::from) {options.time_list = parse_time(res)};
+  if let Some(res) = clap_matches.value_of("significant_figures").map(String::from) {options.significant_figures = parse_significant_figures(res)};
+  if let Some(res) = clap_matches.value_of("graph").map(String::from) {options.graph = parse_metric_vector(res)};
+  if let Some(res) = clap_matches.value_of("cache_duration").map(String::from) {options.cache_duration = parse_cache_duration(res)}; 
+  if let Some(res) = clap_matches.value_of("metrics").map(String::from) {options.metrics = parse_metric_vector(res)};
 
   //options.api =  clap_matches.value_of("api").map_or(options.api, |api_str| api::get_api(api_str).expect(ErrorStrings::NoSuchApi.get_message().unwrap())); 
 }
