@@ -1,4 +1,5 @@
 use crate::prog_options::ProgOptions;
+use chrono::{Local, Timelike};
 use serde_json::{Result, Value};
 use crate::weather_items::{WeatherItem, MetricType};
 
@@ -10,15 +11,15 @@ const FORECAST_PATH: &str = "forecast/";
 
 fn get_metric_for_local_name(name: &str) -> Option<MetricType>{
   match name{
-    "temperature" => Some(TemperatureCur),
-    "temperatureMin" => Some(TemperatureMin),
-    "temperatureMax" => Some(TemperatureMax),
-    "windSpeed" => Some(WindSpeed),
-    "relHumidity" => Some(Humidity),
-    "preasure"/*sic*/ => Some(Pressure),
-    "totalPrecipitation" => Some(Precipitation),
-    "uvIndex" => Some(UvIndex),
-    "airQualityIndex" => Some(AirQuality)
+    "temperature" => Some(MetricType::TemperatureCur),
+    "temperatureMin" => Some(MetricType::TemperatureMin),
+    "temperatureMax" => Some(MetricType::TemperatureMax),
+    "windSpeed" => Some(MetricType::WindSpeed),
+    "relHumidity" => Some(MetricType::Humidity),
+    "preasure"/*sic*/ => Some(MetricType::Pressure),
+    "totalPrecipitation" => Some(MetricType::Precipitation),
+    "uvIndex" => Some(MetricType::UvIndex),
+    "airQualityIndex" => Some(MetricType::AirQuality),
     _ => None
   }
 }
@@ -60,36 +61,36 @@ pub fn build_requests(prog_options: &ProgOptions, locations: Vec<(f64, f64)>) ->
   requests
 }
 
-fn time_to_nearest_hour(time: chrono::DateTime) -> chrono::DateTime{
+fn time_to_nearest_hour(time: chrono::DateTime<Local>) -> chrono::DateTime<Local>{
   time.date().and_hms(time.hour(),0,0)
 }
 
-fn get_relevant_time_list(time_list: Vec<chrono::DateTime>) -> Vec<chrono::DateTime>{
-  time_list.into_iter().map(time_to_nearest_hour).dedup()
+fn get_relevant_time_list(time_list: Vec<chrono::DateTime<Local>>) -> Vec<chrono::DateTime<Local>>{
+  time_list.into_iter().map(time_to_nearest_hour).collect().dedup()
 }
 
-fn get_relevant_date_list(time_list: Vec<chrono::DateTime>) -> Vec<chrono::Date>{
-  time_list.into_iter().map(|time| time.date()).dedup()
+fn get_relevant_date_list(time_list: Vec<chrono::DateTime<Local>>) -> Vec<chrono::Date<Local>>{
+  time_list.into_iter().map(|time| time.date()).collect().dedup()
 }
 
-pub fn parse_results(results: Vec<String>, prog_options: ProgOptions, location_names: Vec<String>) -> Vec<Vec<WeatherItems>>{
-  let mut weather_items_different_locations: Vec<WeatherItems> = vec![];
+pub fn parse_results(results: Vec<String>, prog_options: &ProgOptions, location_names: Vec<String>) -> Vec<Vec<WeatherItem>>{
+  let mut weather_items_different_locations: Vec<WeatherItem> = vec![];
   for (result, location) in results.iter().zip(location_names.iter()){
-    let mut weather_items: Vec<WeatherItems> = vec![];
+    let mut weather_items: Vec<WeatherItem> = vec![];
     let result_json: Value = serde_json::from_str(&result).unwrap();
     let results = result_json["data"];
     if prog_options.time_list[0].nanosecond() == 414269896{
       let results_time_array = results["daily"];
       let relevant_times = get_relevant_date_list(prog_options.time_list);
     } else {
-      let results_time_array = results["hourly"]
+      let results_time_array = results["hourly"];
       let relevant_times = get_relevant_time_list(prog_options.time_list);
     }
     for result_time in results_time_array{
       if let Some(time_mapping) = result_time.as_object(){
         if let Ok(time) = chrono::DateTime::parse_from_rfc3339(time_mapping.get("time")){
           if relevant_times.contains(time) {
-            let mut metrics = new std::collections::HashMap<MetricType, String>;
+            let mut metrics = std::collections::HashMap<MetricType, String>::new();
             for (key, value) in time_mapping{
               if let Some(key_enum_val) = get_metric_for_local_name(key){
                 metrics.insert(key_enum_val, value);

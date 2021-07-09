@@ -1,8 +1,10 @@
 use serde_yaml;
+use crate::weather_items::{WeatherItem, MetricType};
+use crate::prog_options::ProgOptions;
 
 fn reduce_to_significant_figures(weather_items: Vec<WeatherItem>) -> Vec<WeatherItem>{
 
-  weather_items = weather_items.into_iter.map(|item| {
+  weather_items = weather_items.into_iter().map(|item| {
     for key in item.metrics.keys(){
       let val = item.metrics.get(key);
       item.metrics.set(key, (val * 100.0).round() / 100.0);
@@ -12,17 +14,17 @@ fn reduce_to_significant_figures(weather_items: Vec<WeatherItem>) -> Vec<Weather
 }
 
 fn format_weather_type_as_emoji_or_text(weather_items: Vec<WeatherItem>) -> Vec<WeatherItem> {
-  weather_items.into_iter.map(|item| {
+  weather_items.into_iter().map(|item| {
     let weather_type = item.get(MetricType::WeatherType);
     item.set(MetricType::WeatherType, weather_type.get_relevant_message.unwrap())
-  }
+  })
 }
 
-fn to_yaml_string(weather_items: Vec<WeatherItem>) -> Vec<WeatherItem{
+fn to_yaml_string(weather_items: Vec<WeatherItem>) -> Vec<WeatherItem>{
   let weather_map_vec = Vec::new();
   for weather_item in weather_items{
     let weather_item_map = std::collections::HashMap::new();
-    weather_item_map.insert("date", weather_item.date);
+    weather_item_map.insert("date", weather_item.time);
     weather_item_map.insert("location", weather_item.location);
     weather_item_map.insert("metrics", weather_item.metrics);
     weather_map_vec.push(weather_item_map);
@@ -34,8 +36,7 @@ fn build_blocks_of_output(&weather_items: Vec<WeatherItem>) -> Vec<Vec<String>>{
   let mut output_blocks_vector: Vec<Vec<String>> = Vec::new();
   for weather_item in weather_items{
     let mut output_block: Vec<String> = Vec::new();
-    output_block.push(weather_item.date.format("%F %R"));
-    output_block.push(location):
+    output_block.push(weather_item.time.format("%F %R"));
     weather_item.metrics.iter().for_each(|_, value| output_block.push(value)) ;// not quite sure what the syntax here is
     output_blocks_vector.push(output_block);
   }
@@ -64,13 +65,13 @@ fn put_content_into_lines(line_vector: Vec<Vec<String>>) -> Vec<String>{
   line_vector.into_iter().map(|line| line.into_iter().reduce(|acc, item| acc + &item).unwrap())
 }
 
-fn generate_output(&weather_items: Vec<WeatherItem>, &options: ProgOptions, max_line_length: u16) -> Vec<String>{ 
+pub fn generate_output(&weather_items: Vec<WeatherItem>, &options: ProgOptions, max_line_length: u16) -> Vec<String>{ 
   weather_items = reduce_to_significant_figures(weather_items);
   weather_items = format_weather_type_as_emoji_or_text(weather_items);
   if options.human_readable = false{
     to_yaml_string(weather_items)
   } else {
-    let output_blocks_vector = build_block_of_output(weather_items);
+    let output_blocks_vector = build_blocks_of_output(weather_items);
     let line_vector = get_blocks_for_each_line(max_line_length, output_blocks_vector);
     line_vector.push(weather_items[0].location)
     put_content_into_lines(line_vector)

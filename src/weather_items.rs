@@ -4,9 +4,9 @@ use strum_macros::EnumString;
 use chrono;
 #[derive(Debug)]
 pub struct WeatherItem{ 
-  time: chrono::DateTime<chrono::Local>, 
-  location: String, 
-  metrics: std::collections::HashMap<MetricType, String>
+  pub time: chrono::DateTime<chrono::Local>, 
+  pub location: String, 
+  pub metrics: std::collections::HashMap<MetricType, String>
 } 
     
 #[derive(EnumString, Debug )] 
