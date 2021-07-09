@@ -104,46 +104,68 @@ fn get_relevant_date_list(time_list: Vec<chrono::DateTime<Local>>) -> Vec<chrono
   new_time_list
 }
 
-pub fn parse_results(results: Vec<String>, prog_options: &ProgOptions, location_names: Vec<String>) -> Vec<Vec<WeatherItem>>{
-  let mut weather_items_different_locations: Vec<Vec<WeatherItem>> = vec![];
-  for (result, location) in results.iter().zip(location_names.into_iter()){
-    let mut weather_items: Vec<WeatherItem> = vec![];
-    let result_json: Value = serde_json::from_str(&result).unwrap();
-    let results = result_json["data"].as_object().unwrap();
-    let results_time_array: Vec<serde_json::Value> = Vec::new();
-    let relevant_times: Vec<chrono::DateTime<Local>> = Vec::new();
-    if prog_options.time_list[0].nanosecond() == 414269896{
-      let results_time_array = results.get("daily").unwrap().as_array().unwrap();
-      let relevant_times = get_relevant_date_list(prog_options.time_list.clone());
-    } else {
-      let results_time_array = results.get("hourly").unwrap().as_array().unwrap();
-      let relevant_times = get_relevant_time_list(prog_options.time_list.clone());
+fn parse_result_into_weather_items() ->{
+  
+}
+
+fn assemble_weather_item(time_mapping: &Map<String, Value>, time: chrono::DateTime<Local>) -> WeatherItem{
+  let mut metrics: std::collections::HashMap<MetricType, String> = std::collections::HashMap::new();
+  for (key, value) in time_mapping{
+    if let Some(key_enum_val) = get_metric_for_local_name(key){
+      let mut value_as_string = value.as_str().unwrap().to_string();
+      if key_enum_val == MetricType::WeatherType{
+        value_as_string = get_weather_type_for_local_name(&value_as_string).unwrap().to_string();
+      } 
+      metrics.insert(key_enum_val, value_as_string);
     }
-    for result_time in results_time_array{
-      if let Some(time_mapping) = result_time.as_object(){
-        if let Some(time_value) = time_mapping.get("time"){
-          if let Ok(time) = time_value.as_str().unwrap().parse::<chrono::DateTime<Local>>(){
-            if relevant_times.contains(&time) {
-              let mut metrics: std::collections::HashMap<MetricType, String> = std::collections::HashMap::new();
-              for (key, value) in time_mapping{
-                if let Some(key_enum_val) = get_metric_for_local_name(key){
-                  let mut value_as_string = value.as_str().unwrap().to_string();
-                  if key_enum_val == MetricType::WeatherType{
-                    value_as_string = get_weather_type_for_local_name(&value_as_string).unwrap().to_string();
-                  } 
-                  metrics.insert(key_enum_val, value_as_string);
-                }
-              }
-              weather_items.push(WeatherItem{
-                time: time,
-                location: location.clone(),
-                metrics: metrics
-              });
-            }
-          }
+  }
+  WeatherItem{
+    time: time,
+    location: location.clone(),
+    metrics: metrics
+  }
+}
+
+fn insert_into_weather_items_if_valid_unique_time(mut weather_items: &mut Vec<WeatherItem>, result_time: serde_json::Value, relevant_times: &Vec<chrono::DateTime<Local>>){
+  if let Some(time_mapping) = result_time.as_object(){
+    if let Some(time_value) = time_mapping.get("time"){
+      if let Ok(time) = time_value.as_str().unwrap().parse::<chrono::DateTime<Local>>(){
+        if relevant_times.contains(&time) {
+          weather_items.push(assemble_weather_item(time_mapping, time));
         }
       }
     }
+  }
+}
+
+fn is_date(first_time: &chrono::DateTime<Local>)-> bool{
+  first_time.nanosecond() == 414269896
+}
+
+fn get_relevant_results_time_array(results, first_time: &chrono::DateTime<Local>) -> Vec<serde_json::Value> {
+  results.get(if is_date(&first_time) {"daily"} else {"hourly"}).unwrap().as_array().unwrap();
+}
+
+fn get_relevant_temporals(time_list: Vec<chrono::DateTime<Local>>){
+  match is_date(&time_list[0]){
+    true => get_relevant_date_list(time_list),
+    false => get_relevant_time_list(time_list)
+  }
+}
+
+pub fn parse_results(results: Vec<String>, prog_options: &ProgOptions, location_names: Vec<String>) -> Vec<Vec<WeatherItem>>{
+  
+  let mut weather_items_different_locations: Vec<Vec<WeatherItem>> = vec![];
+  
+  for (result, location) in results.iter().zip(location_names.into_iter()){
+
+    let mut weather_items: Vec<WeatherItem> = vec![];
+    let results = serde_json::from_str(&result).unwrap()["data"].as_object().unwrap();
+
+    for result_time in get_relevant_results_time_array(results, &prog_options.time_list[0]){
+      insert_into_weather_items_if_valid_unique_time(&mut weather_items, result_time, &get_relevant_temporals(prog_options.time_list.clone()));
+    }
+    
     weather_items_different_locations.push(weather_items);
   }
   weather_items_different_locations
