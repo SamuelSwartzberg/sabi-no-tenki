@@ -109,14 +109,14 @@ pub fn parse_results(results: Vec<String>, prog_options: &ProgOptions, location_
   for (result, location) in results.iter().zip(location_names.into_iter()){
     let mut weather_items: Vec<WeatherItem> = vec![];
     let result_json: Value = serde_json::from_str(&result).unwrap();
-    let results = result_json["data"];
+    let results = result_json["data"].as_object().unwrap();
     let results_time_array: Vec<serde_json::Value> = Vec::new();
     let relevant_times: Vec<chrono::DateTime<Local>> = Vec::new();
     if prog_options.time_list[0].nanosecond() == 414269896{
-      let results_time_array = results["daily"].as_array().unwrap();
+      let results_time_array = results.get("daily").unwrap().as_array().unwrap();
       let relevant_times = get_relevant_date_list(prog_options.time_list.clone());
     } else {
-      let results_time_array = results["hourly"].as_array().unwrap();
+      let results_time_array = results.get("hourly").unwrap().as_array().unwrap();
       let relevant_times = get_relevant_time_list(prog_options.time_list.clone());
     }
     for result_time in results_time_array{
