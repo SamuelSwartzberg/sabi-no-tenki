@@ -48,7 +48,7 @@ pub fn parse_location_results_names(results: &Vec<String>) -> Vec<String>{
   for result in results{
     let result_json: Value = serde_json::from_str(&result).unwrap();
     let first_location = &result_json["data"][0];
-    names.push(first_location["name"] + ", " + &first_location["country"])
+    names.push(first_location["name"].as_str().unwrap() + ", " + &first_location["country"].as_str().unwrap())
   }
   names
 }
@@ -66,7 +66,9 @@ fn time_to_nearest_hour(time: chrono::DateTime<Local>) -> chrono::DateTime<Local
 }
 
 fn get_relevant_time_list(time_list: Vec<chrono::DateTime<Local>>) -> Vec<chrono::DateTime<Local>>{
-  time_list.into_iter().map(time_to_nearest_hour).collect().dedup()
+  let mut new_time_list = time_list.into_iter().map(time_to_nearest_hour).collect::Vec<chrono::DateTime<Local>>()
+  new_time_list.dedup();
+  new_time_list
 }
 
 fn get_relevant_date_list(time_list: Vec<chrono::DateTime<Local>>) -> Vec<chrono::Date<Local>>{
