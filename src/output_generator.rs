@@ -1,31 +1,34 @@
 use serde_yaml;
-use crate::weather_items::{WeatherItem, MetricType};
+use crate::weather_items::{WeatherItem, MetricType, get_relevant_message};
 use crate::prog_options::ProgOptions;
 
-fn reduce_to_significant_figures(weather_items: &Vec<WeatherItem>) -> Vec<WeatherItem>{
-  weather_items.iter().map(|item| {
-    for key in item.metrics.keys(){
-      let val = item.metrics.get(key);
-      item.metrics.set(key, (val * 100.0).round() / 100.0);
+fn reduce_to_significant_figures(weather_items: &mut Vec<WeatherItem>, significant_figures: u8){
+  for weather_item in weather_items{
+    for key in weather_item.metrics.keys(){
+      let val = weather_item.metrics.get(key).unwrap();
+      if let Ok(float_val) = val.parse::<f32>(){
+        weather_item.metrics.insert(key, 
+          ((float_val * 10f32.powi(significant_figures.into())).round() / 10f32.powi(significant_figures.into())).to_string()
+        );
+      }
     }
-    item
-  }).collect()
+  }
 }
 
-fn format_weather_type_as_emoji_or_text(weather_items: &Vec<WeatherItem>) -> Vec<WeatherItem> {
-  weather_items.iter().map(|item| {
-    let weather_type = item.get(MetricType::WeatherType);
-    item.set(MetricType::WeatherType, weather_type.get_relevant_message.unwrap())
-  }).collect()
+fn format_weather_type_as_emoji_or_text(weather_items: &mut Vec<WeatherItem>, emoji: bool, text: bool){
+  for weather_item in weather_items{
+    let weather_type = weather_item.metrics.get(&MetricType::WeatherType).unwrap();
+    weather_item.metrics.insert(MetricType::WeatherType, get_relevant_message(weather_type, emoji, text).unwrap());
+  }
 }
 
 fn to_yaml_string(weather_items: Vec<WeatherItem>) -> Vec<String>{
   let weather_map_vec = Vec::new();
   for weather_item in weather_items{
-    let weather_item_map = std::collections::HashMap<String, serde_yaml::Value>::new();
-    weather_item_map.insert("date", serde_yaml::to_value(weather_item.time).unwrap());
-    weather_item_map.insert("location", serde_yaml::to_value(weather_item.location).unwrap());
-    weather_item_map.insert("metrics", serde_yaml::to_value(weather_item.metrics).unwrap());
+    let weather_item_map = std::collections::HashMap::<String, serde_yaml::Value>::new();
+    weather_item_map.insert("date".to_string(), serde_yaml::to_value(weather_item.time).unwrap());
+    weather_item_map.insert("location".to_string(), serde_yaml::to_value(weather_item.location).unwrap());
+    weather_item_map.insert("metrics".to_string(), serde_yaml::to_value(weather_item.metrics).unwrap());
     weather_map_vec.push(weather_item_map);
   }
   serde_yaml::to_string(&weather_map_vec).unwrap().lines().map(|item| item.to_string()).collect()
@@ -76,9 +79,9 @@ fn put_content_into_lines(block_line_vector: Vec<Vec<Vec<String>>>) -> Vec<Strin
   line_vector
 }
 
-pub fn generate_output(weather_items:  &Vec<WeatherItem>, options: &ProgOptions, max_line_length: usize) -> Vec<String>{ 
-  let weather_items = reduce_to_significant_figures(&weather_items);
-  let weather_items = format_weather_type_as_emoji_or_text(&weather_items);
+pub fn generate_output(weather_items:  &mut Vec<WeatherItem>, options: &ProgOptions, max_line_length: usize) -> Vec<String>{ 
+  reduce_to_significant_figures(&mut weather_items, options.significant_figures);
+  format_weather_type_as_emoji_or_text(&mut weather_items);
   if options.human_readable == false{
     to_yaml_string(weather_items)
   } else {

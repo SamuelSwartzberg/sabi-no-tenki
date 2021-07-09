@@ -9,7 +9,7 @@ pub struct WeatherItem{
   pub metrics: std::collections::HashMap<MetricType, String>
 } 
     
-#[derive(EnumString, Debug )] 
+#[derive(EnumString, Debug, PartialEq, Eq, Hash )] 
 #[strum(ascii_case_insensitive)]
 pub enum MetricType{
   WeatherType,
@@ -82,11 +82,9 @@ pub enum WeatherType{
   Thunderstorms     
 } 
 
-impl WeatherType{
-  fn get_relevant_message(self, detailed: bool) -> Option<&'static str>{
-    match detailed{
-      true => self.get_detailed_message(),
-      false => self.get_message()
-    }
-  }
+pub fn get_relevant_message(weather_type: WeatherType, emoji: bool, text: bool) -> Option<String>{
+  let message = "".to_string();
+  if emoji {message = weather_type.get_message()?.to_owned() + " "};
+  if text {message += weather_type.get_detailed_message()?};
+  Some(message)
 }

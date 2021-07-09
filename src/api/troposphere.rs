@@ -23,6 +23,31 @@ fn get_metric_for_local_name(name: &str) -> Option<MetricType>{
     _ => None
   }
 }
+fn get_weather_type_for_local_name(name: &str) -> Option<MetricType>{
+  match name{  
+    "clear" => Some(WeatherType::Clear),
+    "partially-cloudy" => Some(WeatherType::PartlyCloudy),
+    "cloudy" => Some(WeatherType::Cloudy),
+    "dust" => Some(WeatherType::Dust),
+    "mist" => Some(WeatherType::Mist),
+    "fog" => Some(WeatherType::Fog),
+    "rain" => Some(WeatherType::Rain),
+    "snow" => Some(WeatherType::Snow),
+    "sandstorm" => Some(WeatherType::Sandstorm),
+    "snow-shower" => Some(WeatherType::SnowShower),
+    "rain-snow-showers" => Some(WeatherType::RainSnowShower),
+    "drizzle" => Some(WeatherType::LightRain), //also drizzle    
+    "rain-showers" => Some(WeatherType::RainShower),
+    "sleet" => Some(WeatherType::Sleet),
+    "rain-freezing" => Some(WeatherType::FreezingRain),
+    "hail" => Some(WeatherType::Hail),
+    "thunderstorm" => Some(WeatherType::Thunderstorms),
+    "snow-hail" => Some(WeatherType::Snow),
+    "snowdrifting" => Some(WeatherType::Snow),
+    _ => None
+  }
+} 
+
 
 pub fn build_location_requests(locations: &Vec<String>) -> Vec<String>{
   let mut requests: Vec<String> = vec![];
@@ -48,7 +73,7 @@ pub fn parse_location_results_names(results: &Vec<String>) -> Vec<String>{
   for result in results{
     let result_json: Value = serde_json::from_str(&result).unwrap();
     let first_location = &result_json["data"][0];
-    names.push(first_location["name"].as_str().unwrap() + ", " + &first_location["country"].as_str().unwrap())
+    names.push(first_location["name"].as_str().unwrap().to_string() + ", " + &first_location["country"].as_str().unwrap())
   }
   names
 }
@@ -66,43 +91,50 @@ fn time_to_nearest_hour(time: chrono::DateTime<Local>) -> chrono::DateTime<Local
 }
 
 fn get_relevant_time_list(time_list: Vec<chrono::DateTime<Local>>) -> Vec<chrono::DateTime<Local>>{
-  let mut new_time_list = time_list.into_iter().map(time_to_nearest_hour).collect::Vec<chrono::DateTime<Local>>()
+  let mut new_time_list = time_list.into_iter().map(time_to_nearest_hour).collect::<Vec<chrono::DateTime<Local>>>();
   new_time_list.dedup();
   new_time_list
 }
 
-fn get_relevant_date_list(time_list: Vec<chrono::DateTime<Local>>) -> Vec<chrono::Date<Local>>{
-  time_list.into_iter().map(|time| time.date()).collect().dedup()
+/// Must return DateTime because troposphere itself returns datetimes with 00:00:00 for whole days
+fn get_relevant_date_list(time_list: Vec<chrono::DateTime<Local>>) -> Vec<chrono::DateTime<Local>>{
+  let mut new_time_list = time_list.into_iter().map(|time| time.date()).map(|date| date.and_hms(0,0,0)).collect::<Vec<chrono::DateTime<Local>>>();
+  new_time_list.dedup();
+  new_time_list
 }
 
 pub fn parse_results(results: Vec<String>, prog_options: &ProgOptions, location_names: Vec<String>) -> Vec<Vec<WeatherItem>>{
-  let mut weather_items_different_locations: Vec<WeatherItem> = vec![];
-  for (result, location) in results.iter().zip(location_names.iter()){
+  let mut weather_items_different_locations: Vec<Vec<WeatherItem>> = vec![];
+  for (result, location) in results.iter().zip(location_names.into_iter()){
     let mut weather_items: Vec<WeatherItem> = vec![];
     let result_json: Value = serde_json::from_str(&result).unwrap();
     let results = result_json["data"];
+    let results_time_array: Vec<serde_json::Value> = Vec::new();
+    let relevant_times: Vec<chrono::DateTime<Local>> = Vec::new();
     if prog_options.time_list[0].nanosecond() == 414269896{
-      let results_time_array = results["daily"];
+      let results_time_array = results["daily"].as_array().unwrap();
       let relevant_times = get_relevant_date_list(prog_options.time_list);
     } else {
-      let results_time_array = results["hourly"];
+      let results_time_array = results["hourly"].as_array().unwrap();
       let relevant_times = get_relevant_time_list(prog_options.time_list);
     }
     for result_time in results_time_array{
       if let Some(time_mapping) = result_time.as_object(){
-        if let Ok(time) = chrono::DateTime::parse_from_rfc3339(time_mapping.get("time")){
-          if relevant_times.contains(time) {
-            let mut metrics = std::collections::HashMap<MetricType, String>::new();
-            for (key, value) in time_mapping{
-              if let Some(key_enum_val) = get_metric_for_local_name(key){
-                metrics.insert(key_enum_val, value);
+        if let Some(time_value) = time_mapping.get("time"){
+          if let Ok(time) = time_value.as_str().unwrap().parse::<chrono::DateTime<Local>>(){
+            if relevant_times.contains(&time) {
+              let mut metrics: std::collections::HashMap<MetricType, String> = std::collections::HashMap::new();
+              for (key, value) in time_mapping{
+                if let Some(key_enum_val) = get_metric_for_local_name(key){
+                  metrics.insert(key_enum_val, value.as_str().unwrap().to_string());
+                }
               }
+              weather_items.push(WeatherItem{
+                time: time,
+                location: location,
+                metrics: metrics
+              });
             }
-            weather_items.push(WeatherItem{
-              time: time,
-              location: location,
-              metrics: metrics
-            }):
           }
         }
       }

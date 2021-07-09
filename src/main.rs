@@ -26,7 +26,9 @@ fn main() {
   // cache::cache_result(&result, options.cache_duration);
   let weather_parsed_results = api::troposphere::parse_results(results.unwrap(), &options, names );
   for weather_parsed_result in weather_parsed_results{
-    let output = output_generator::generate_output(&weather_parsed_result, &options, terminal_size::terminal_size().unwrap().0);
-    output.iter().forEach(|line| println!("{}", line));
+    let output = output_generator::generate_output(&mut weather_parsed_result, &options, usize::from(terminal_size::terminal_size().unwrap().0.0));
+    for line in output{
+      println!("{}", line);
+    }
   }
 }
