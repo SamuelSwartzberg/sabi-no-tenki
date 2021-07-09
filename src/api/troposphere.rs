@@ -1,7 +1,7 @@
 use crate::prog_options::ProgOptions;
 use chrono::{Local, Timelike};
 use serde_json::{Result, Value};
-use crate::weather_items::{WeatherItem, MetricType};
+use crate::weather_items::{WeatherItem, MetricType, WeatherType};
 
 
 const API_KEY: &str = "9580e6ee934dcdaa209c5ea6b3de9f939f23d0a2e9975a9181";
@@ -20,10 +20,11 @@ fn get_metric_for_local_name(name: &str) -> Option<MetricType>{
     "totalPrecipitation" => Some(MetricType::Precipitation),
     "uvIndex" => Some(MetricType::UvIndex),
     "airQualityIndex" => Some(MetricType::AirQuality),
+    "type" => Some(MetricType::WeatherType),
     _ => None
   }
 }
-fn get_weather_type_for_local_name(name: &str) -> Option<MetricType>{
+fn get_weather_type_for_local_name(name: &str) -> Option<WeatherType>{
   match name{  
     "clear" => Some(WeatherType::Clear),
     "partially-cloudy" => Some(WeatherType::PartlyCloudy),
@@ -113,10 +114,10 @@ pub fn parse_results(results: Vec<String>, prog_options: &ProgOptions, location_
     let relevant_times: Vec<chrono::DateTime<Local>> = Vec::new();
     if prog_options.time_list[0].nanosecond() == 414269896{
       let results_time_array = results["daily"].as_array().unwrap();
-      let relevant_times = get_relevant_date_list(prog_options.time_list);
+      let relevant_times = get_relevant_date_list(prog_options.time_list.clone());
     } else {
       let results_time_array = results["hourly"].as_array().unwrap();
-      let relevant_times = get_relevant_time_list(prog_options.time_list);
+      let relevant_times = get_relevant_time_list(prog_options.time_list.clone());
     }
     for result_time in results_time_array{
       if let Some(time_mapping) = result_time.as_object(){
@@ -126,12 +127,16 @@ pub fn parse_results(results: Vec<String>, prog_options: &ProgOptions, location_
               let mut metrics: std::collections::HashMap<MetricType, String> = std::collections::HashMap::new();
               for (key, value) in time_mapping{
                 if let Some(key_enum_val) = get_metric_for_local_name(key){
-                  metrics.insert(key_enum_val, value.as_str().unwrap().to_string());
+                  let mut value_as_string = value.as_str().unwrap().to_string();
+                  if key_enum_val == MetricType::WeatherType{
+                    value_as_string = get_weather_type_for_local_name(&value_as_string).unwrap().to_string();
+                  } 
+                  metrics.insert(key_enum_val, value_as_string);
                 }
               }
               weather_items.push(WeatherItem{
                 time: time,
-                location: location,
+                location: location.clone(),
                 metrics: metrics
               });
             }

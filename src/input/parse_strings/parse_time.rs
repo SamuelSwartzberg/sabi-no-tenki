@@ -5,7 +5,6 @@ use strum::EnumMessage;
 
 fn parse_duration(duration_string: &str) -> Option<chrono::Duration>{
   let time_string: String = String::from(duration_string).chars().filter(|c| c.is_digit(10)).collect();
-  let time: i64 = 0;  
   match time_string.parse::<i64>().ok() {
     Some(time) => {
       if duration_string.ends_with("h") {

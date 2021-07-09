@@ -2,6 +2,8 @@ use strum;
 use strum::EnumMessage;
 use strum_macros::EnumString;
 use chrono;
+use serde::{Serialize};
+
 #[derive(Debug)]
 pub struct WeatherItem{ 
   pub time: chrono::DateTime<chrono::Local>, 
@@ -9,7 +11,7 @@ pub struct WeatherItem{
   pub metrics: std::collections::HashMap<MetricType, String>
 } 
     
-#[derive(EnumString, Debug, PartialEq, Eq, Hash )] 
+#[derive(EnumString, Debug, PartialEq, Eq, Hash, Serialize, Clone )] 
 #[strum(ascii_case_insensitive)]
 pub enum MetricType{
   WeatherType,
@@ -42,7 +44,7 @@ pub enum MetricType{
   ChanceOfSnow,
   ChanceOfThunder
 }
-#[derive(strum_macros::EnumMessage, Debug)]
+#[derive(strum_macros::EnumMessage, strum_macros::ToString, EnumString, Debug)]
 pub enum WeatherType{    
   #[strum(message="☀️", detailed_message="clear")]    
   Clear,    
@@ -83,7 +85,7 @@ pub enum WeatherType{
 } 
 
 pub fn get_relevant_message(weather_type: WeatherType, emoji: bool, text: bool) -> Option<String>{
-  let message = "".to_string();
+  let mut message = "".to_string();
   if emoji {message = weather_type.get_message()?.to_owned() + " "};
   if text {message += weather_type.get_detailed_message()?};
   Some(message)
