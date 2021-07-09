@@ -82,7 +82,7 @@ fn parse_keywords(keyword_string: &str) ->  Vec<chrono::DateTime<chrono::Local>>
 }
 
 fn add_magic_number(date: chrono::Date<chrono::Local>) -> chrono::DateTime<chrono::Local>{
-  date.and_hms_milli(0,0,39, 511)
+  date.and_hms_nano(0,0,39,414269896)
 }
 
 pub fn parse_time(time_string: String) -> Vec<chrono::DateTime<chrono::Local>>{

@@ -72,6 +72,7 @@ fn generate_output(&weather_items: Vec<WeatherItem>, &options: ProgOptions, max_
   } else {
     let output_blocks_vector = build_block_of_output(weather_items);
     let line_vector = get_blocks_for_each_line(max_line_length, output_blocks_vector);
+    line_vector.push(weather_items[0].location)
     put_content_into_lines(line_vector)
   }
 } 

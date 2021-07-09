@@ -10,16 +10,16 @@ const FORECAST_PATH: &str = "forecast/";
 
 fn get_metric_for_local_name(name: &str) -> Option<MetricType>{
   match name{
-    "temperature" => TemperatureCur,
-    "temperatureMin" => TemperatureMin,
-    "temperatureMax" => TemperatureMax,
-    "windSpeed" => WindSpeed,
-    "relHumidity" => Humidity,
-    "preasure"/*sic*/ => Pressure,
-    "totalPrecipitation" => Precipitation,
-    "uvIndex" => UvIndex,
-    "airQualityIndex" => AirQuality
-    _ => 
+    "temperature" => Some(TemperatureCur),
+    "temperatureMin" => Some(TemperatureMin),
+    "temperatureMax" => Some(TemperatureMax),
+    "windSpeed" => Some(WindSpeed),
+    "relHumidity" => Some(Humidity),
+    "preasure"/*sic*/ => Some(Pressure),
+    "totalPrecipitation" => Some(Precipitation),
+    "uvIndex" => Some(UvIndex),
+    "airQualityIndex" => Some(AirQuality)
+    _ => None
   }
 }
 
@@ -31,7 +31,7 @@ pub fn build_location_requests(locations: &Vec<String>) -> Vec<String>{
   requests
 }
 
-pub fn parse_location_results(results: Vec<String>) -> Vec<(f64, f64)>{
+pub fn parse_location_results(results: &Vec<String>) -> Vec<(f64, f64)>{
   let mut coordinates: Vec<(f64, f64)> = vec![];
   for result in results{
     let result_json: Value = serde_json::from_str(&result).unwrap();
@@ -41,6 +41,17 @@ pub fn parse_location_results(results: Vec<String>) -> Vec<(f64, f64)>{
   }
   coordinates
 }
+
+pub fn parse_location_results_names(results: &Vec<String>) -> Vec<String>{
+  let mut names: Vec<String> = vec![];
+  for result in results{
+    let result_json: Value = serde_json::from_str(&result).unwrap();
+    let first_location = &result_json["data"][0];
+    names.push(first_location["name"] + ", " + &first_location["country"])
+  }
+  names
+}
+
 pub fn build_requests(prog_options: &ProgOptions, locations: Vec<(f64, f64)>) -> Vec<String>{
   let mut requests: Vec<String> = vec![];
   for location in locations{
@@ -49,14 +60,53 @@ pub fn build_requests(prog_options: &ProgOptions, locations: Vec<(f64, f64)>) ->
   requests
 }
 
-fn get_relevant_time_list()
+fn time_to_nearest_hour(time: chrono::DateTime) -> chrono::DateTime{
+  time.date().and_hms(time.hour(),0,0)
+}
 
-pub fn parse_results(results: Vec<String>) -> Vec<WeatherItems>{
-  let mut weather_items: Vec<WeatherItems> = vec![];
-  for result in results{
+fn get_relevant_time_list(time_list: Vec<chrono::DateTime>) -> Vec<chrono::DateTime>{
+  time_list.into_iter().map(time_to_nearest_hour).dedup()
+}
+
+fn get_relevant_date_list(time_list: Vec<chrono::DateTime>) -> Vec<chrono::Date>{
+  time_list.into_iter().map(|time| time.date()).dedup()
+}
+
+pub fn parse_results(results: Vec<String>, prog_options: ProgOptions, location_names: Vec<String>) -> Vec<Vec<WeatherItems>>{
+  let mut weather_items_different_locations: Vec<WeatherItems> = vec![];
+  for (result, location) in results.iter().zip(location_names.iter()){
+    let mut weather_items: Vec<WeatherItems> = vec![];
     let result_json: Value = serde_json::from_str(&result).unwrap();
-
+    let results = result_json["data"];
+    if prog_options.time_list[0].nanosecond() == 414269896{
+      let results_time_array = results["daily"];
+      let relevant_times = get_relevant_date_list(prog_options.time_list);
+    } else {
+      let results_time_array = results["hourly"]
+      let relevant_times = get_relevant_time_list(prog_options.time_list);
+    }
+    for result_time in results_time_array{
+      if let Some(time_mapping) = result_time.as_object(){
+        if let Ok(time) = chrono::DateTime::parse_from_rfc3339(time_mapping.get("time")){
+          if relevant_times.contains(time) {
+            let mut metrics = new std::collections::HashMap<MetricType, String>;
+            for (key, value) in time_mapping{
+              if let Some(key_enum_val) = get_metric_for_local_name(key){
+                metrics.insert(key_enum_val, value);
+              }
+            }
+            weather_items.push(WeatherItem{
+              time: time,
+              location: location,
+              metrics: metrics
+            }):
+          }
+        }
+      }
+    }
+    weather_items_different_locations.push(weather_items);
   }
+  weather_items_different_locations
   
 }
 //   troposphere //https://www.troposphere.io/developer
