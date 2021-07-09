@@ -2,6 +2,8 @@ use crate::prog_options::ProgOptions;
 use chrono::{Local, Timelike};
 use serde_json::{Result, Value};
 use crate::weather_items::{WeatherItem, MetricType, WeatherType};
+use crate::error_strings::ErrorStrings;
+use strum::EnumMessage;
 
 
 const API_KEY: &str = "9580e6ee934dcdaa209c5ea6b3de9f939f23d0a2e9975a9181";
@@ -108,9 +110,15 @@ fn assemble_weather_item(time_mapping: &serde_json::Map<String, Value>, time: ch
   for (key, value) in time_mapping{
     if let Some(key_enum_val) = get_metric_for_local_name(key){
       println!("{:?}", value);
-      let mut value_as_string: String = value.to_string();
+      let mut value_as_string: String = if value.is_string(){
+        value.as_str().unwrap().to_string() // safe unwrap since we've checked
+      } else {
+        value.to_string()
+      };
+      println!("{:?}", value_as_string);
       if key_enum_val == MetricType::WeatherType{
-        value_as_string = get_weather_type_for_local_name(&value_as_string).expect().to_string();
+        assert_eq!("thunderstorm", &value_as_string);
+        value_as_string = get_weather_type_for_local_name(&value_as_string).expect(ErrorStrings::NoSuchWeatherType.get_message().unwrap()).to_string();
       } 
       metrics.insert(key_enum_val, value_as_string);
     }

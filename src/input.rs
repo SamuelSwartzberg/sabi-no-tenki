@@ -1,6 +1,5 @@
 mod config;
 mod defaults;
-mod error_strings;
 mod parse_strings;
 
 use crate::prog_options::ProgOptions;

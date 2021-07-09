@@ -17,5 +17,7 @@ pub enum ErrorStrings{
   #[strum(message = "")]
   TimeFormatError,
   #[strum(message = "Specified metric does not exist. Metric supplied was ")]
-  NoSuchMetric
+  NoSuchMetric,
+  #[strum(message = "The API returned a weather type which does not correspond to any local weather type.")]
+  NoSuchWeatherType,
 }

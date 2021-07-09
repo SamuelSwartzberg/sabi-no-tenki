@@ -5,6 +5,8 @@ mod command_line;
 mod get_path;
 mod prog_options;
 mod http_request;
+mod error_strings;
+
 // mod cache;
 mod output_generator;
 
