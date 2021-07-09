@@ -1,7 +1,7 @@
 mod parse_time;
 
 use crate::weather_items::MetricType;
-use super::error_strings::ErrorStrings;
+use crate::error_strings::ErrorStrings;
 use strum::EnumMessage;
 pub use parse_time::parse_time as parse_time;
 use chrono;

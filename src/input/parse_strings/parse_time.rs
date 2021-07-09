@@ -1,6 +1,6 @@
 use chrono;
 use chrono::{TimeZone, Datelike};
-use crate::input::error_strings::ErrorStrings;
+use crate::error_strings::ErrorStrings;
 use strum::EnumMessage;
 
 fn parse_duration(duration_string: &str) -> Option<chrono::Duration>{
