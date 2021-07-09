@@ -5,7 +5,7 @@ use chrono;
 pub fn get_base_defaults() -> ProgOptions{
   ProgOptions{
     time_list: vec![chrono::Local::now()],
-    location_list: vec![String::from("Tokyo")],
+    location_list: vec![String::from("Kyoto")],
     // api: Box<dyn api::Query>,
     human_readable: true,
     significant_figures: 1,
