@@ -14,9 +14,11 @@ use terminal_size;
 
 fn get_results_from_cache_or_http(requests: Vec<String>, cache_type: &str, cache_duration: &chrono::Duration) -> Vec<String>{
   if let Some(cache_str) = cache::get_result_from_cache(cache_duration, cache_type, &requests) {
+    println!("{:#?}", "trying to retrieve from cache");
     cache_str
   } else {
     let results = http_request::get_results_from_requests(&requests).unwrap();
+    println!("{:#?}", "trying to cache");
     cache::cache_result(&results, cache_type, &requests);
     results
   }
@@ -35,9 +37,7 @@ fn main() {
   let requests = api::troposphere::build_requests(&options, locations);
 
   let results = get_results_from_cache_or_http(requests, "weather", &options.cache_duration);
-  println!("{:#?}", results);
   let weather_parsed_results = api::troposphere::parse_results(results, &options, names );
-  println!("{:#?}", weather_parsed_results);
   for mut weather_parsed_result in weather_parsed_results{
     let output = output_generator::generate_output(&mut weather_parsed_result, &options, usize::from(terminal_size::terminal_size().unwrap().0.0));
     for line in output{

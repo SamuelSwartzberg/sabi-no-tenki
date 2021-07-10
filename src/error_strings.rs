@@ -20,4 +20,8 @@ pub enum ErrorStrings{
   NoSuchMetric,
   #[strum(message = "The API returned a weather type which does not correspond to any local weather type.")]
   NoSuchWeatherType,
+  #[strum(message = "Could not create path for cache directory.")]
+  CouldNotCreateCachePath,
+  #[strum(message = "Could not create cache file at cache path.")]
+  CouldNotCreateCacheFile,
 }

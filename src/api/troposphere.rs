@@ -63,10 +63,11 @@ pub fn build_location_requests(locations: &Vec<String>) -> Vec<String>{
 
 pub fn parse_location_results(results: &Vec<String>) -> Vec<(f64, f64)>{
   let mut coordinates: Vec<(f64, f64)> = vec![];
+  println!("{:#?}", results);
   for result in results{
     let result_json: Value = serde_json::from_str(&result).unwrap();
+    println!("{:#?}", result_json);
     let first_location = &result_json["data"][0];
-    println!("{:?}", first_location);
     coordinates.push((first_location["latitude"].as_f64().unwrap(), first_location["longitude"].as_f64().unwrap()))
   }
   coordinates
@@ -123,7 +124,6 @@ fn assemble_weather_item(time_mapping: &serde_json::Map<String, Value>, time: ch
     }
   }
   
-  println!("{:?}",is_date);
   WeatherItem{
     time: time,
     location: location.clone(),
@@ -137,8 +137,6 @@ fn insert_into_weather_items_if_valid_unique_time(weather_items: &mut Vec<Weathe
     if let Some(time_value) = time_mapping.get("time"){
       if let Ok(time) = time_value.as_str().unwrap().parse::<chrono::DateTime<FixedOffset>>(){
         if is_relevant_time(time) {
-          println!("{:#?}", time);
-          println!("{:#?}", time_value);
           weather_items.push(assemble_weather_item(time_mapping, time, location, is_date));
         }
       }
@@ -170,7 +168,6 @@ pub fn parse_results(results: Vec<String>, prog_options: &ProgOptions, location_
     let results = results_json["data"].as_object().unwrap();
 
     for result_time in get_relevant_results_time_array(results, &prog_options.time_list[0]){
-      println!("{:#?}", result_time);
       if is_date(&prog_options.time_list.clone()[0]){
         insert_into_weather_items_if_valid_unique_time(
           &mut weather_items, 
