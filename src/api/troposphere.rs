@@ -1,5 +1,5 @@
 use crate::prog_options::ProgOptions;
-use chrono::{Local, Timelike};
+use chrono::{Local, FixedOffset, Timelike};
 use serde_json::{Result, Value};
 use crate::weather_items::{WeatherItem, MetricType, WeatherType};
 use crate::error_strings::ErrorStrings;
@@ -29,7 +29,7 @@ fn get_metric_for_local_name(name: &str) -> Option<MetricType>{
 fn get_weather_type_for_local_name(name: &str) -> Option<WeatherType>{
   match name{  
     "clear" => Some(WeatherType::Clear),
-    "partially-cloudy" => Some(WeatherType::PartlyCloudy),
+    "partly-cloudy" => Some(WeatherType::PartlyCloudy),
     "cloudy" => Some(WeatherType::Cloudy),
     "dust" => Some(WeatherType::Dust),
     "mist" => Some(WeatherType::Mist),
@@ -105,19 +105,16 @@ fn get_relevant_date_list(time_list: Vec<chrono::DateTime<Local>>) -> Vec<chrono
   new_time_list
 }
 
-fn assemble_weather_item(time_mapping: &serde_json::Map<String, Value>, time: chrono::DateTime<Local>, location: String) -> WeatherItem{
+fn assemble_weather_item(time_mapping: &serde_json::Map<String, Value>, time: chrono::DateTime<FixedOffset>, location: String) -> WeatherItem{
   let mut metrics: std::collections::HashMap<MetricType, String> = std::collections::HashMap::new();
   for (key, value) in time_mapping{
     if let Some(key_enum_val) = get_metric_for_local_name(key){
-      println!("{:?}", value);
       let mut value_as_string: String = if value.is_string(){
         value.as_str().unwrap().to_string() // safe unwrap since we've checked
       } else {
         value.to_string()
       };
-      println!("{:?}", value_as_string);
       if key_enum_val == MetricType::WeatherType{
-        assert_eq!("thunderstorm", &value_as_string);
         value_as_string = get_weather_type_for_local_name(&value_as_string).expect(ErrorStrings::NoSuchWeatherType.get_message().unwrap()).to_string();
       } 
       metrics.insert(key_enum_val, value_as_string);
@@ -132,13 +129,11 @@ fn assemble_weather_item(time_mapping: &serde_json::Map<String, Value>, time: ch
 
 fn insert_into_weather_items_if_valid_unique_time(mut weather_items: &mut Vec<WeatherItem>, result_time: serde_json::Value, location: String, is_relevant_time: &Fn(chrono::DateTime<Local>) -> bool){
   if let Some(time_mapping) = result_time.as_object(){
-    println!("time_mapping: {:?}", time_mapping);
     if let Some(time_value) = time_mapping.get("time"){
-      println!("time_value: {:?}", time_mapping);
       if let Ok(time) = time_value.as_str().unwrap().parse::<chrono::DateTime<Local>>(){
-        println!("time: {:?}", time);
         if is_relevant_time(time) {
-          weather_items.push(assemble_weather_item(time_mapping, time, location));
+          let time_local = time_value.as_str().unwrap().parse::<chrono::DateTime<FixedOffset>>().unwrap();
+          weather_items.push(assemble_weather_item(time_mapping, time_local, location));
         }
       }
     }
@@ -166,11 +161,17 @@ pub fn parse_results(results: Vec<String>, prog_options: &ProgOptions, location_
 
     for result_time in get_relevant_results_time_array(results, &prog_options.time_list[0]){
       if is_date(&prog_options.time_list.clone()[0]){
-        insert_into_weather_items_if_valid_unique_time(&mut weather_items, result_time, location.clone(),
+        insert_into_weather_items_if_valid_unique_time(
+          &mut weather_items, 
+          result_time, 
+          location.clone(),
           &|time| get_relevant_date_list(prog_options.time_list.clone()).contains(&time.date())
         );
       } else {
-        insert_into_weather_items_if_valid_unique_time(&mut weather_items, result_time, location.clone(),
+        insert_into_weather_items_if_valid_unique_time(
+          &mut weather_items, 
+          result_time, 
+          location.clone(),
           &|time| get_relevant_time_list(prog_options.time_list.clone()).contains(&time)
         );
       }

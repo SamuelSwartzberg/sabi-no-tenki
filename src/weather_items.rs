@@ -6,7 +6,7 @@ use serde::{Serialize};
 
 #[derive(Debug)]
 pub struct WeatherItem{ 
-  pub time: chrono::DateTime<chrono::Local>, 
+  pub time: chrono::DateTime<chrono::FixedOffset>, 
   pub location: String, 
   pub metrics: std::collections::HashMap<MetricType, String>
 } 
