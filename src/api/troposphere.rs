@@ -4,6 +4,7 @@ use serde_json::{Result, Value};
 use crate::weather_items::{WeatherItem, MetricType, WeatherType};
 use crate::error_strings::ErrorStrings;
 use strum::EnumMessage;
+use indexmap::IndexMap;
 
 
 const API_KEY: &str = "9580e6ee934dcdaa209c5ea6b3de9f939f23d0a2e9975a9181";
@@ -106,7 +107,7 @@ fn get_relevant_date_list(time_list: Vec<chrono::DateTime<Local>>) -> Vec<chrono
 }
 
 fn assemble_weather_item(time_mapping: &serde_json::Map<String, Value>, time: chrono::DateTime<FixedOffset>, location: String) -> WeatherItem{
-  let mut metrics: std::collections::HashMap<MetricType, String> = std::collections::HashMap::new();
+  let mut metrics: IndexMap<MetricType, String> = IndexMap::new();
   for (key, value) in time_mapping{
     if let Some(key_enum_val) = get_metric_for_local_name(key){
       let mut value_as_string: String = if value.is_string(){
@@ -120,6 +121,7 @@ fn assemble_weather_item(time_mapping: &serde_json::Map<String, Value>, time: ch
       metrics.insert(key_enum_val, value_as_string);
     }
   }
+  println!("{:?}", metrics.keys());
   WeatherItem{
     time: time,
     location: location.clone(),

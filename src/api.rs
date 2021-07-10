@@ -2,7 +2,7 @@
 //! `api/`, and then adding the api to the apis array here.
 
 // use crate::{ProgOptions, WeatherItem, MetricType};
-// use std::collections::HashMap;
+// use IndexMap;
 //pub mod metaweather_query;
 pub mod troposphere;
 

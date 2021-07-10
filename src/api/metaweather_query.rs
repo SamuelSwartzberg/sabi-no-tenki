@@ -25,7 +25,7 @@
 
 #[derive(Debug)]
 struct MetaweatherQuery{
-//  generic_metric_names_map: HashMap<MetricType, &str>
+//  generic_metric_names_map: IndexMap<MetricType, &str>
 }
 //
 impl Query for MetaweatherQuery{

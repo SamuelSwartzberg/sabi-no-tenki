@@ -3,15 +3,17 @@ use strum::EnumMessage;
 use strum_macros::EnumString;
 use chrono;
 use serde::{Serialize};
+use indexmap::IndexMap;
+
 
 #[derive(Debug)]
 pub struct WeatherItem{ 
   pub time: chrono::DateTime<chrono::FixedOffset>, 
   pub location: String, 
-  pub metrics: std::collections::HashMap<MetricType, String>
+  pub metrics: IndexMap<MetricType, String>
 } 
     
-#[derive(EnumString, Debug, PartialEq, Eq, Hash, Serialize, Clone )] 
+#[derive(EnumString, Debug,  strum_macros::ToString, PartialEq, Eq, Hash, Serialize, Clone )] 
 #[strum(ascii_case_insensitive)]
 pub enum MetricType{
   WeatherType,

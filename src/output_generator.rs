@@ -2,6 +2,8 @@ use serde_yaml;
 use crate::weather_items::{WeatherItem, WeatherType, MetricType, get_relevant_message};
 use crate::prog_options::ProgOptions;
 use std::str::FromStr;
+use indexmap::IndexMap;
+
 
 fn reduce_to_significant_figures(weather_items: &mut Vec<WeatherItem>, significant_figures: u8){
   for weather_item in weather_items{
@@ -26,6 +28,7 @@ fn format_weather_type_as_emoji_or_text(weather_items: &mut Vec<WeatherItem>, em
 
 fn to_yaml_string(weather_items: &mut Vec<WeatherItem>) -> Vec<String>{
   let mut weather_map_vec = Vec::new();
+
   for weather_item in weather_items{
     let mut weather_item_map = std::collections::HashMap::<String, serde_yaml::Value>::new();
     weather_item_map.insert("date".to_string(), serde_yaml::to_value(weather_item.time.format("%b, %d.%m. %R").to_string()).unwrap());
@@ -36,12 +39,22 @@ fn to_yaml_string(weather_items: &mut Vec<WeatherItem>) -> Vec<String>{
   serde_yaml::to_string(&weather_map_vec).unwrap().lines().map(|item| item.to_string()).collect()
 }
 
-fn build_blocks_of_output(weather_items: &mut Vec<WeatherItem>) -> Vec<Vec<String>>{
+fn build_blocks_of_output(weather_items: &mut Vec<WeatherItem>,  metrics: &Vec<MetricType>, labeled_columns: bool) -> Vec<Vec<String>>{
   let mut output_blocks_vector: Vec<Vec<String>> = Vec::new();
+  if labeled_columns{ 
+    let mut first_column: Vec<String> = vec!["Date".to_string()];
+    first_column.append(
+      &mut weather_items[0].metrics.keys()
+      .filter(|key| metrics.contains(&key))
+      .map(|key| key.to_string()).collect::<Vec<String>>()
+    );
+    output_blocks_vector.push(first_column);
+  }
+  println!("{:?}", output_blocks_vector);
   for weather_item in weather_items{
     let mut output_block: Vec<String> = Vec::new();
     output_block.push(weather_item.time.format("%F %R").to_string());
-    weather_item.metrics.clone().into_iter().for_each(|(_, value)| output_block.push(value)) ;// not quite sure what the syntax here is
+    weather_item.metrics.clone().into_iter().filter(|(key, _)| metrics.contains(&key)).for_each(|(_, value)| output_block.push(value)) ;// not quite sure what the syntax here is
     output_blocks_vector.push(output_block);
   }
   output_blocks_vector
@@ -76,6 +89,7 @@ fn put_content_into_lines(block_line_vector: Vec<Vec<Vec<String>>>) -> Vec<Strin
     block_line_vector.resize(block_line[0].len(), "".to_string());
     for block in block_line{
       let mut index = 0; //eww
+      println!("{:?}", block);
       for line_of_block in block{
         block_line_vector[index] += &line_of_block;
         index+=1;
@@ -94,7 +108,7 @@ pub fn generate_output(mut weather_items:  &mut Vec<WeatherItem>, options: &Prog
     to_yaml_string(weather_items)
   } else {
     let location = weather_items[0].location.clone();
-    let output_blocks_vector = build_blocks_of_output(weather_items);
+    let output_blocks_vector = build_blocks_of_output(weather_items, &options.metrics, options.labeled_columns);
     println!("{:?}", output_blocks_vector);
     let block_line_vector = get_blocks_for_each_line(max_line_length, output_blocks_vector);
     let mut lines: Vec<String> = Vec::new();
