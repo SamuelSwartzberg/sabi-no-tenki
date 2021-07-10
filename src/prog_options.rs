@@ -1,6 +1,12 @@
 use chrono;
 use crate::weather_items;
 
+pub enum WeekStarts{
+  Sat,
+  Sun,
+  Mon
+}
+
 #[derive(Debug)]
 pub struct ProgOptions{
   pub time_list: Vec<chrono::DateTime<chrono::Local>>,
@@ -10,8 +16,7 @@ pub struct ProgOptions{
   pub significant_figures: u8,
   pub emoji: bool,
   pub text: bool,
-  pub week_starts_sat: bool,
-  pub week_starts_sun: bool,
+  pub week_starts: WeekStarts,
   pub labeled_columns: bool,
   pub graph:  Vec<weather_items::MetricType>,
   pub cache_duration: chrono::Duration,

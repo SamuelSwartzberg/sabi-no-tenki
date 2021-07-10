@@ -2,6 +2,7 @@ use chrono;
 use chrono::{TimeZone, Datelike};
 use crate::error_strings::ErrorStrings;
 use strum::EnumMessage;
+use crate::prog_options::WeekStarts;
 
 fn parse_duration(duration_string: &str) -> Option<chrono::Duration>{
   let time_string: String = String::from(duration_string).chars().filter(|c| c.is_digit(10)).collect();
@@ -61,21 +62,52 @@ fn get_date_based_on_weekday(weekday: chrono::Weekday, week_offset: u32) -> chro
     )
   ).unwrap()
 }
-fn parse_keywords(keyword_string: &str) ->  Vec<chrono::DateTime<chrono::Local>>{
+
+fn get_weekday_of_week_end(week_starts: &WeekStarts) -> chrono::Weekday{
+  match week_starts{
+    WeekStarts::Mon => chrono::Weekday::Sun,
+    WeekStarts::Sun => chrono::Weekday::Sat,
+    WeekStarts::Sat => chrono::Weekday::Fri,
+  }
+}
+
+fn get_weekday_of_week_start(week_starts: &WeekStarts) -> chrono::Weekday{
+  match week_starts{
+    WeekStarts::Mon => chrono::Weekday::Mon,
+    WeekStarts::Sun => chrono::Weekday::Sun,
+    WeekStarts::Sat => chrono::Weekday::Sat,
+  }
+}
+
+/// this holds true in most jurisdictions, but not all. 
+fn get_weekday_of_weekend_start(week_starts: &WeekStarts) -> chrono::Weekday{ 
+  match week_starts{
+    WeekStarts::Mon => chrono::Weekday::Sat,
+    WeekStarts::Sun => chrono::Weekday::Sat,
+    WeekStarts::Sat => chrono::Weekday::Fri,
+  }
+}
+fn parse_keywords(keyword_string: &str, week_starts: &WeekStarts) ->  Vec<chrono::DateTime<chrono::Local>>{
   match keyword_string {
     "today" => vec![add_magic_number(chrono::Local::today())],
     "week" | "this week" => get_vec_of_days(
       chrono::Local::today(), 
-      get_date_based_on_weekday(chrono::Weekday::Sun, 0).checked_add_signed(chrono::Duration::days(1)).unwrap() // just specifying monday allows us to travel back in time and create an infinite loop so
+      get_date_based_on_weekday(get_weekday_of_week_end(week_starts), 0).checked_add_signed(chrono::Duration::days(1)).unwrap() // just specifying the beginning of the week allows us to travel back in time and create an infinite loop so
     ),
-    "weekend" | "this weekend" => get_vec_of_days(
-      get_date_based_on_weekday(chrono::Weekday::Sat, 0), 
-      get_date_based_on_weekday(chrono::Weekday::Sat, 0).checked_add_signed(chrono::Duration::days(2)).unwrap()
-    ),
-    "next week" => get_vec_of_days(
-      get_date_based_on_weekday(chrono::Weekday::Mon, 1), 
-      get_date_based_on_weekday(chrono::Weekday::Mon, 1).checked_add_signed(chrono::Duration::days(7)).unwrap()
-    ),
+    "weekend" | "this weekend" => {
+      let weekend_start_date = get_date_based_on_weekday(get_weekday_of_weekend_start(week_starts), 0);
+      get_vec_of_days(
+        weekend_start_date, 
+        weekend_start_date.checked_add_signed(chrono::Duration::days(2)).unwrap()
+      )
+    },
+    "next week" => {
+      let next_week_start_date = get_date_based_on_weekday(get_weekday_of_week_start(week_starts), 1);
+      get_vec_of_days(
+        next_week_start_date, 
+        next_week_start_date.checked_add_signed(chrono::Duration::days(7)).unwrap()
+      )
+    },
     &_ => panic!(ErrorStrings::NoSuchDateString.get_message().unwrap()) 
   }
 }
@@ -84,13 +116,13 @@ fn add_magic_number(date: chrono::Date<chrono::Local>) -> chrono::DateTime<chron
   date.and_hms_nano(0,0,0,414269896)
 }
 
-pub fn parse_time(time_string: String) -> Vec<chrono::DateTime<chrono::Local>>{
+pub fn parse_time(time_string: String, week_starts: &WeekStarts) -> Vec<chrono::DateTime<chrono::Local>>{
   let mut time_components = time_string.split(":");
   let first_component = time_components.next().unwrap();
   match time_components.next(){
     None => {
       match parse_duration(first_component){
-        None => parse_keywords(first_component),
+        None => parse_keywords(first_component, week_starts),
         Some(duration) => vec![chrono::Local::now().checked_add_signed(duration).unwrap()]
       }
     }, Some(stop_string) => {
