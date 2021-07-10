@@ -106,7 +106,7 @@ fn get_relevant_date_list(time_list: Vec<chrono::DateTime<Local>>) -> Vec<chrono
   new_time_list
 }
 
-fn assemble_weather_item(time_mapping: &serde_json::Map<String, Value>, time: chrono::DateTime<FixedOffset>, location: String) -> WeatherItem{
+fn assemble_weather_item(time_mapping: &serde_json::Map<String, Value>, time: chrono::DateTime<FixedOffset>, location: String, is_date: bool) -> WeatherItem{
   let mut metrics: IndexMap<MetricType, String> = IndexMap::new();
   for (key, value) in time_mapping{
     if let Some(key_enum_val) = get_metric_for_local_name(key){
@@ -122,21 +122,22 @@ fn assemble_weather_item(time_mapping: &serde_json::Map<String, Value>, time: ch
     }
   }
   
-  println!("{:?}", metrics.keys());
+  println!("{:?}",is_date);
   WeatherItem{
     time: time,
     location: location.clone(),
-    metrics: metrics
+    metrics: metrics,
+    is_date: is_date
   }
 }
 
-fn insert_into_weather_items_if_valid_unique_time(mut weather_items: &mut Vec<WeatherItem>, result_time: serde_json::Value, location: String, is_relevant_time: &Fn(chrono::DateTime<Local>) -> bool){
+fn insert_into_weather_items_if_valid_unique_time(mut weather_items: &mut Vec<WeatherItem>, result_time: serde_json::Value, location: String, is_relevant_time: &Fn(chrono::DateTime<Local>) -> bool, is_date: bool){
   if let Some(time_mapping) = result_time.as_object(){
     if let Some(time_value) = time_mapping.get("time"){
       if let Ok(time) = time_value.as_str().unwrap().parse::<chrono::DateTime<Local>>(){
         if is_relevant_time(time) {
           let time_local = time_value.as_str().unwrap().parse::<chrono::DateTime<FixedOffset>>().unwrap();
-          weather_items.push(assemble_weather_item(time_mapping, time_local, location));
+          weather_items.push(assemble_weather_item(time_mapping, time_local, location, is_date));
         }
       }
     }
@@ -168,14 +169,16 @@ pub fn parse_results(results: Vec<String>, prog_options: &ProgOptions, location_
           &mut weather_items, 
           result_time, 
           location.clone(),
-          &|time| get_relevant_date_list(prog_options.time_list.clone()).contains(&time.date())
+          &|time| get_relevant_date_list(prog_options.time_list.clone()).contains(&time.date()),
+          true
         );
       } else {
         insert_into_weather_items_if_valid_unique_time(
           &mut weather_items, 
           result_time, 
           location.clone(),
-          &|time| get_relevant_time_list(prog_options.time_list.clone()).contains(&time)
+          &|time| get_relevant_time_list(prog_options.time_list.clone()).contains(&time),
+          false
         );
       }
       

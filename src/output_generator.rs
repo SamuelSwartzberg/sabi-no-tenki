@@ -32,7 +32,8 @@ fn to_yaml_string(weather_items: &mut Vec<WeatherItem>) -> Vec<String>{
 
   for weather_item in weather_items{
     let mut weather_item_map = std::collections::HashMap::<String, serde_yaml::Value>::new();
-    weather_item_map.insert("date".to_string(), serde_yaml::to_value(weather_item.time.format("%b, %d.%m. %R").to_string()).unwrap());
+    let format_string = if (weather_item.is_date) {"%F"} else {"%F %R"};
+    weather_item_map.insert("date".to_string(), serde_yaml::to_value(weather_item.time.format(format_string).to_string()).unwrap());
     weather_item_map.insert("location".to_string(), serde_yaml::to_value(weather_item.location.clone()).unwrap());
     weather_item_map.insert("metrics".to_string(), serde_yaml::to_value(weather_item.metrics.clone()).unwrap());
     weather_map_vec.push(weather_item_map);
@@ -54,7 +55,8 @@ fn build_blocks_of_output(weather_items: &mut Vec<WeatherItem>,  metrics: &Vec<M
   println!("{:?}", output_blocks_vector);
   for weather_item in weather_items{
     let mut output_block: Vec<String> = Vec::new();
-    output_block.push(weather_item.time.format("%F %R").to_string());
+    let format_string = if (weather_item.is_date) {"%b, %d.%m."} else {"%b, %d.%m. %R"};
+    output_block.push(weather_item.time.format(format_string).to_string());
     weather_item.metrics.clone().into_iter().filter(|(key, _)| metrics.contains(&key)).for_each(|(_, value)| output_block.push(value)) ;// not quite sure what the syntax here is
     output_blocks_vector.push(output_block);
   }

@@ -10,7 +10,8 @@ use indexmap::IndexMap;
 pub struct WeatherItem{ 
   pub time: chrono::DateTime<chrono::FixedOffset>, 
   pub location: String, 
-  pub metrics: IndexMap<MetricType, String>
+  pub metrics: IndexMap<MetricType, String>,
+  pub is_date: bool
 } 
     
 #[derive(strum_macros::EnumMessage, EnumString, Debug,  strum_macros::ToString, PartialEq, Eq, Hash, Serialize, Clone )] 
