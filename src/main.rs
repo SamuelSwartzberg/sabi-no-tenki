@@ -12,12 +12,12 @@ mod utils;
 
 use terminal_size;
 
-fn get_results_from_cache_or_http(requests: Vec<String>, suffix: String) -> Vec<String>{
-  if let Some(cache_str) = cache::get_result_from_cache(&options.cache_duration, suffix) {
+fn get_results_from_cache_or_http(requests: Vec<String>, cache_type: String) -> Vec<String>{
+  if let Some(cache_str) = cache::get_result_from_cache(&options.cache_duration, cache_type, &requests) {
     cache_str
   } else {
     let results = http_request::get_results_from_requests(requests).unwrap();
-    cache::cache_result(&results, suffix);
+    cache::cache_result(&results, cache_type);
     results
   }
 } 
