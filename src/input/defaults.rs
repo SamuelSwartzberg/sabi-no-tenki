@@ -16,6 +16,6 @@ pub fn get_base_defaults() -> ProgOptions{
     labeled_columns: false,
     graph: Vec::new(),
     cache_duration: chrono::Duration::hours(1),
-    metrics: vec![MetricType::Precipitation, MetricType::TemperatureCur]
+    metrics: vec![MetricType::Precipitation, MetricType::Temperature]
   }
 }  

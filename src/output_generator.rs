@@ -2,6 +2,7 @@ use serde_yaml;
 use crate::weather_items::{WeatherItem, WeatherType, MetricType, get_relevant_message};
 use crate::prog_options::ProgOptions;
 use std::str::FromStr;
+use strum::EnumMessage;
 use indexmap::IndexMap;
 
 
@@ -46,7 +47,7 @@ fn build_blocks_of_output(weather_items: &mut Vec<WeatherItem>,  metrics: &Vec<M
     first_column.append(
       &mut weather_items[0].metrics.keys()
       .filter(|key| metrics.contains(&key))
-      .map(|key| key.to_string()).collect::<Vec<String>>()
+      .map(|key| key.get_message().unwrap().to_string()).collect::<Vec<String>>()
     );
     output_blocks_vector.push(first_column);
   }

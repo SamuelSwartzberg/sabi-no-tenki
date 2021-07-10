@@ -14,7 +14,7 @@ const FORECAST_PATH: &str = "forecast/";
 
 fn get_metric_for_local_name(name: &str) -> Option<MetricType>{
   match name{
-    "temperature" => Some(MetricType::TemperatureCur),
+    "temperature" => Some(MetricType::Temperature),
     "temperatureMin" => Some(MetricType::TemperatureMin),
     "temperatureMax" => Some(MetricType::TemperatureMax),
     "windSpeed" => Some(MetricType::WindSpeed),
@@ -121,6 +121,7 @@ fn assemble_weather_item(time_mapping: &serde_json::Map<String, Value>, time: ch
       metrics.insert(key_enum_val, value_as_string);
     }
   }
+  
   println!("{:?}", metrics.keys());
   WeatherItem{
     time: time,

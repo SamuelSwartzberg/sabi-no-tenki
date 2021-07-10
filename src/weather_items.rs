@@ -13,37 +13,66 @@ pub struct WeatherItem{
   pub metrics: IndexMap<MetricType, String>
 } 
     
-#[derive(EnumString, Debug,  strum_macros::ToString, PartialEq, Eq, Hash, Serialize, Clone )] 
+#[derive(strum_macros::EnumMessage, EnumString, Debug,  strum_macros::ToString, PartialEq, Eq, Hash, Serialize, Clone )] 
 #[strum(ascii_case_insensitive)]
 pub enum MetricType{
+  #[strum(message="Weather Type")]
   WeatherType,
+  #[strum(message="Wind Speed (m/s)")]
   WindSpeed,
+  #[strum(message="Wind direction (°)")]
   WindDirection,
-  TemperatureCur,
+  #[strum(message="Temperature (°C)")]
+  Temperature,
+  #[strum(message="Maximum Temperature (°C)")]
   TemperatureMin,
+  #[strum(message="Minimum Temperature (°C)")]
   TemperatureMax,
+  #[strum(message="Humidity (%)")]
   Humidity,
+  #[strum(message="Pressure (Pa)")]
   Pressure,
+  #[strum(message="Precipitation (l/m2)")]
   Precipitation,
+  #[strum(message="UV index (1-10)")]
   UvIndex,
+  #[strum(message="Air Quality (diff.)")]
   AirQuality,
+  #[strum(message="Visibility")]
   Visibility,
+  #[strum(message="Weather Type")]
   Predictability,
+  #[strum(message="Cloud Cover")]
   CloudCover,
+  #[strum(message="Heat Index")]
   HeatIndex,
+  #[strum(message="Dewpoint")]
   Dewpoint,
-  WindChill,
+  #[strum(message="Windchill")]
+  Windchill,
+  #[strum(message="Wind Gust")]
   WindGust,
+  #[strum(message="Feels Like")]
   FeelsLike,
+  #[strum(message="Chance of Ran")]
   ChanceOfRain,
+  #[strum(message="Chance of Remaining Dry")]
   ChanceOfRemainingDry,
+  #[strum(message="Chance of Wind")]
   ChanceOfWindy,
+  #[strum(message="Chance of being Overcast")]
   ChanceOfOvercast,
+  #[strum(message="Chance of Sunshine")]
   ChanceOfSunshine,
+  #[strum(message="Chance of Frost")]
   ChanceOfFrost,
+  #[strum(message="Chance of High Temp")]
   ChanceOfHighTemp,
+  #[strum(message="Chance of Fog")]
   ChanceOfFog,
+  #[strum(message="Chance of Snow")]
   ChanceOfSnow,
+  #[strum(message="Chance of Thunder")]
   ChanceOfThunder
 }
 #[derive(strum_macros::EnumMessage, strum_macros::ToString, EnumString, Debug)]
