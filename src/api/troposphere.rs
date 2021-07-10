@@ -131,7 +131,7 @@ fn assemble_weather_item(time_mapping: &serde_json::Map<String, Value>, time: ch
   }
 }
 
-fn insert_into_weather_items_if_valid_unique_time(mut weather_items: &mut Vec<WeatherItem>, result_time: serde_json::Value, location: String, is_relevant_time: &Fn(chrono::DateTime<Local>) -> bool, is_date: bool){
+fn insert_into_weather_items_if_valid_unique_time(mut weather_items: &mut Vec<WeatherItem>, result_time: serde_json::Value, location: String, is_relevant_time: &dyn Fn(chrono::DateTime<Local>) -> bool, is_date: bool){
   if let Some(time_mapping) = result_time.as_object(){
     if let Some(time_value) = time_mapping.get("time"){
       if let Ok(time) = time_value.as_str().unwrap().parse::<chrono::DateTime<Local>>(){
