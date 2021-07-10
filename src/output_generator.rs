@@ -3,7 +3,7 @@ use crate::weather_items::{WeatherItem, WeatherType, MetricType, get_relevant_me
 use crate::prog_options::ProgOptions;
 use std::str::FromStr;
 use strum::EnumMessage;
-use indexmap::IndexMap;
+//use indexmap::IndexMap;
 
 
 fn reduce_to_significant_figures(weather_items: &mut Vec<WeatherItem>, significant_figures: u8){
@@ -32,7 +32,7 @@ fn to_yaml_string(weather_items: &mut Vec<WeatherItem>) -> Vec<String>{
 
   for weather_item in weather_items{
     let mut weather_item_map = std::collections::HashMap::<String, serde_yaml::Value>::new();
-    let format_string = if (weather_item.is_date) {"%F"} else {"%F %R"};
+    let format_string = if weather_item.is_date {"%F"} else {"%F %R"};
     weather_item_map.insert("date".to_string(), serde_yaml::to_value(weather_item.time.format(format_string).to_string()).unwrap());
     weather_item_map.insert("location".to_string(), serde_yaml::to_value(weather_item.location.clone()).unwrap());
     weather_item_map.insert("metrics".to_string(), serde_yaml::to_value(weather_item.metrics.clone()).unwrap());

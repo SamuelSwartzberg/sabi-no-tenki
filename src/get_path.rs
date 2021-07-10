@@ -8,10 +8,11 @@ fn get_xdg_or_default(xdg_variant: String, path: String) -> String {
     |_ /* compiler told me to but not sure why i'm even getting an arg here*/| std::env::var("HOME").unwrap() + "/." + &xdg_variant
   ) + "/" + &path
 }
-pub fn get_cache_location(cache_type: String, requests: &Vec<String>) -> String {
+pub fn get_cache_location(cache_type: &str, requests: &Vec<String>) -> String {
   let mut hasher = DefaultHasher::new();
-  let hash = requests.hash(&mut hasher);
-  get_xdg_or_default("cache".to_string(),"tenki/".to_string()+&cache_type+"_" + hash+".json") 
+  requests.hash(&mut hasher);
+  let hash = hasher.finish().to_string();
+  get_xdg_or_default("cache".to_string(),"tenki/".to_string()+cache_type+"_" + &hash+".json") 
 }
 pub fn get_config_location() -> String {
   get_xdg_or_default("config".to_string(),"tenki_config.yaml".to_string())

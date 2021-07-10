@@ -12,12 +12,12 @@ mod utils;
 
 use terminal_size;
 
-fn get_results_from_cache_or_http(requests: Vec<String>, cache_type: String) -> Vec<String>{
-  if let Some(cache_str) = cache::get_result_from_cache(&options.cache_duration, cache_type, &requests) {
+fn get_results_from_cache_or_http(requests: Vec<String>, cache_type: &str, cache_duration: &chrono::Duration) -> Vec<String>{
+  if let Some(cache_str) = cache::get_result_from_cache(cache_duration, cache_type, &requests) {
     cache_str
   } else {
-    let results = http_request::get_results_from_requests(requests).unwrap();
-    cache::cache_result(&results, cache_type);
+    let results = http_request::get_results_from_requests(&requests).unwrap();
+    cache::cache_result(&results, cache_type, &requests);
     results
   }
 } 
@@ -28,13 +28,13 @@ fn main() {
   let options = input::parse_matches_into_options(matches);
   let location_requests = api::troposphere::build_location_requests(&options.location_list);
 
-  let location_results = get_results_from_cache_or_http(location_requests, "location");
+  let location_results = get_results_from_cache_or_http(location_requests, "location", &options.cache_duration);
 
   let locations = api::troposphere::parse_location_results(&location_results);
   let names = api::troposphere::parse_location_results_names(&location_results);
   let requests = api::troposphere::build_requests(&options, locations);
 
-  let results = get_results_from_cache_or_http(requests, "weather");
+  let results = get_results_from_cache_or_http(requests, "weather", &options.cache_duration);
 
   let weather_parsed_results = api::troposphere::parse_results(results, &options, names );
   println!("{:#?}", weather_parsed_results);

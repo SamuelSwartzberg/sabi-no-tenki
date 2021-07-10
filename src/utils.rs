@@ -1,10 +1,10 @@
 use std::time::SystemTime;
-use chrono::{DateTime, Utc, TimeZone};
+use chrono::{DateTime, Local, TimeZone};
 use std::time::UNIX_EPOCH;
 
 
 /// via: https://users.rust-lang.org/t/convert-std-time-systemtime-to-chrono-datetime-datetime/7684/2
-pub fn system_time_to_date_time(t: SystemTime) -> DateTime<Utc> {
+pub fn system_time_to_date_time(t: SystemTime) -> DateTime<Local> {
   let (sec, nsec) = match t.duration_since(UNIX_EPOCH) {
       Ok(dur) => (dur.as_secs() as i64, dur.subsec_nanos()),
       Err(e) => { // unlikely but should be handled
@@ -17,5 +17,5 @@ pub fn system_time_to_date_time(t: SystemTime) -> DateTime<Utc> {
           }
       },
   };
-  Utc.timestamp(sec, nsec)
+  Local.timestamp(sec, nsec)
 }

@@ -1,6 +1,6 @@
 use crate::prog_options::ProgOptions;
 use chrono::{Local, FixedOffset, Timelike};
-use serde_json::{Result, Value};
+use serde_json::{/*Result,*/Value};
 use crate::weather_items::{WeatherItem, MetricType, WeatherType};
 use crate::error_strings::ErrorStrings;
 use strum::EnumMessage;
@@ -82,7 +82,8 @@ pub fn parse_location_results_names(results: &Vec<String>) -> Vec<String>{
   names
 }
 
-pub fn build_requests(prog_options: &ProgOptions, locations: Vec<(f64, f64)>) -> Vec<String>{
+/// prog_options is not used here, but might for other apis, so it's here for consistency
+pub fn build_requests(_prog_options: &ProgOptions, locations: Vec<(f64, f64)>) -> Vec<String>{
   let mut requests: Vec<String> = vec![];
   for location in locations{
     requests.push(format!("{}{}{},{}?token={}", BASE_URL, FORECAST_PATH, location.0.to_string(), location.1.to_string(), API_KEY));
@@ -131,7 +132,7 @@ fn assemble_weather_item(time_mapping: &serde_json::Map<String, Value>, time: ch
   }
 }
 
-fn insert_into_weather_items_if_valid_unique_time(mut weather_items: &mut Vec<WeatherItem>, result_time: serde_json::Value, location: String, is_relevant_time: &dyn Fn(chrono::DateTime<Local>) -> bool, is_date: bool){
+fn insert_into_weather_items_if_valid_unique_time(weather_items: &mut Vec<WeatherItem>, result_time: serde_json::Value, location: String, is_relevant_time: &dyn Fn(chrono::DateTime<Local>) -> bool, is_date: bool){
   if let Some(time_mapping) = result_time.as_object(){
     if let Some(time_value) = time_mapping.get("time"){
       if let Ok(time) = time_value.as_str().unwrap().parse::<chrono::DateTime<Local>>(){

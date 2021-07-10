@@ -8,7 +8,7 @@ use parse_strings::{parse_location_list, parse_time, parse_metric_vector, parse_
 use config::ConfigView;
 
 fn check_clap_boolean_flags(flag_names: [&str; 6], clap_matches: &clap::ArgMatches) -> Vec<bool>{
-  flag_names.into_iter().map(|flag_name| clap_matches.is_present(flag_name)).collect()
+  flag_names.iter().map(|flag_name| clap_matches.is_present(flag_name)).collect()
 }
 
 fn replace_with_config(config: ConfigView, options: &mut ProgOptions){
