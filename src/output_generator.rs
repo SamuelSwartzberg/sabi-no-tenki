@@ -59,23 +59,28 @@ fn get_blocks_for_each_line(max_line_length: usize, output_blocks_vector: Vec<Ve
       line_length_current = 0;
     }
     line_length_current += longest_line_in_block_length;
-    let output_block_padded = output_block.iter().map(|string_item| format!{"{:width$}", string_item, width=longest_line_in_block_length}).collect(); // pad each item in the block
+    let output_block_padded = output_block.iter().map(|string_item| format!{"{:width$}", string_item, width=longest_line_in_block_length+2}).collect(); // pad each item in the block
     current_block_line.push(output_block_padded);
   }
+  block_line_vector.push(current_block_line); // last one will not have overflowed
+  println!("{:?}", block_line_vector);
   block_line_vector
 }
 
 fn put_content_into_lines(block_line_vector: Vec<Vec<Vec<String>>>) -> Vec<String>{
+  println!("{:?}", block_line_vector);
   let mut line_vector: Vec<String> = Vec::new();
   for block_line in block_line_vector{
+    
     let mut block_line_vector: Vec<String> = Vec::new();
     block_line_vector.resize(block_line[0].len(), "".to_string());
     for block in block_line{
       let mut index = 0; //eww
       for line_of_block in block{
-        block_line_vector[index] = line_of_block;
+        block_line_vector[index] += &line_of_block;
         index+=1;
       }
+      println!("{:?}", block_line_vector);
     }
     line_vector.append(&mut block_line_vector);
   }
@@ -90,6 +95,7 @@ pub fn generate_output(mut weather_items:  &mut Vec<WeatherItem>, options: &Prog
   } else {
     let location = weather_items[0].location.clone();
     let output_blocks_vector = build_blocks_of_output(weather_items);
+    println!("{:?}", output_blocks_vector);
     let block_line_vector = get_blocks_for_each_line(max_line_length, output_blocks_vector);
     let mut lines: Vec<String> = Vec::new();
     lines.push(location);
