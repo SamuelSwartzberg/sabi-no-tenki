@@ -19,12 +19,27 @@ fn main() {
   let matches = command_line::get_command_line_input();
   let options = input::parse_matches_into_options(matches);
   let location_requests = api::troposphere::build_location_requests(&options.location_list);
-  let location_results = http_request::get_results_from_requests(location_requests).unwrap();
+  
+  let location_results = if let Some(cache_str) = cache::get_result_from_cache() {
+    location_results = cache_str;
+  } else {
+    let location_results_local = http_request::get_results_from_requests(location_requests).unwrap();
+    cache::cache_result(&location_results_local, &options.cache_duration);
+    location_results_local
+  }
+
   let locations = api::troposphere::parse_location_results(&location_results);
   let names = api::troposphere::parse_location_results_names(&location_results);
   let requests = api::troposphere::build_requests(&options, locations);
-  let results = http_request::get_results_from_requests(requests);
-  // cache::cache_result(&result, options.cache_duration);
+
+  let location_results = if let Some(cache_str) = cache::get_result_from_cache() {
+    location_results = cache_str;
+  } else {
+    let results_local = http_request::get_results_from_requests(requests);
+    cache::cache_result(&results_local, &options.cache_duration);
+    results_local
+  }
+
   let weather_parsed_results = api::troposphere::parse_results(results.unwrap(), &options, names );
   println!("{:#?}", weather_parsed_results);
   for mut weather_parsed_result in weather_parsed_results{
