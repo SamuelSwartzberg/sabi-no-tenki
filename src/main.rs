@@ -35,7 +35,7 @@ fn main() {
   let requests = api::troposphere::build_requests(&options, locations);
 
   let results = get_results_from_cache_or_http(requests, "weather", &options.cache_duration);
-
+  println!("{:#?}", results);
   let weather_parsed_results = api::troposphere::parse_results(results, &options, names );
   println!("{:#?}", weather_parsed_results);
   for mut weather_parsed_result in weather_parsed_results{

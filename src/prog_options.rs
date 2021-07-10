@@ -1,6 +1,7 @@
 use chrono;
 use crate::weather_items;
 
+#[derive(Debug)]
 pub enum WeekStarts{
   Sat,
   Sun,

@@ -95,14 +95,14 @@ fn time_to_nearest_hour(time: chrono::DateTime<Local>) -> chrono::DateTime<Local
   time.date().and_hms(time.hour(),0,0)
 }
 
-fn get_relevant_time_list(time_list: Vec<chrono::DateTime<Local>>) -> Vec<chrono::DateTime<Local>>{
-  let mut new_time_list = time_list.into_iter().map(time_to_nearest_hour).collect::<Vec<chrono::DateTime<Local>>>();
+fn get_relevant_time_list(time_list: Vec<chrono::DateTime<Local>>) -> Vec<chrono::DateTime<FixedOffset>>{
+  let mut new_time_list = time_list.into_iter().map(time_to_nearest_hour).map(local_to_fixed).collect::<Vec<chrono::DateTime<FixedOffset>>>();
   new_time_list.dedup();
   new_time_list
 }
 
-fn get_relevant_date_list(time_list: Vec<chrono::DateTime<Local>>) -> Vec<chrono::Date<Local>>{
-  let mut new_time_list = time_list.into_iter().map(|time| time.date()).collect::<Vec<chrono::Date<Local>>>();
+fn get_relevant_date_list(time_list: Vec<chrono::DateTime<Local>>) -> Vec<chrono::Date<FixedOffset>>{
+  let mut new_time_list = time_list.into_iter().map(local_to_fixed).map(|time| time.date()).collect::<Vec<chrono::Date<FixedOffset>>>();
   new_time_list.dedup();
   new_time_list
 }
@@ -132,13 +132,14 @@ fn assemble_weather_item(time_mapping: &serde_json::Map<String, Value>, time: ch
   }
 }
 
-fn insert_into_weather_items_if_valid_unique_time(weather_items: &mut Vec<WeatherItem>, result_time: serde_json::Value, location: String, is_relevant_time: &dyn Fn(chrono::DateTime<Local>) -> bool, is_date: bool){
+fn insert_into_weather_items_if_valid_unique_time(weather_items: &mut Vec<WeatherItem>, result_time: serde_json::Value, location: String, is_relevant_time: &dyn Fn(chrono::DateTime<FixedOffset>) -> bool, is_date: bool){
   if let Some(time_mapping) = result_time.as_object(){
     if let Some(time_value) = time_mapping.get("time"){
-      if let Ok(time) = time_value.as_str().unwrap().parse::<chrono::DateTime<Local>>(){
+      if let Ok(time) = time_value.as_str().unwrap().parse::<chrono::DateTime<FixedOffset>>(){
         if is_relevant_time(time) {
-          let time_local = time_value.as_str().unwrap().parse::<chrono::DateTime<FixedOffset>>().unwrap();
-          weather_items.push(assemble_weather_item(time_mapping, time_local, location, is_date));
+          println!("{:#?}", time);
+          println!("{:#?}", time_value);
+          weather_items.push(assemble_weather_item(time_mapping, time, location, is_date));
         }
       }
     }
@@ -153,6 +154,10 @@ fn get_relevant_results_time_array(results: &serde_json::Map<String, Value>, fir
   results.get(if is_date(&first_time) {"daily"} else {"hourly"}).unwrap().as_array().unwrap().clone()
 }
 
+fn local_to_fixed(local_date_time: chrono::DateTime<Local>) -> chrono::DateTime<FixedOffset> {
+  local_date_time.with_timezone(local_date_time.offset())
+}
+
 
 pub fn parse_results(results: Vec<String>, prog_options: &ProgOptions, location_names: Vec<String>) -> Vec<Vec<WeatherItem>>{
   
@@ -165,6 +170,7 @@ pub fn parse_results(results: Vec<String>, prog_options: &ProgOptions, location_
     let results = results_json["data"].as_object().unwrap();
 
     for result_time in get_relevant_results_time_array(results, &prog_options.time_list[0]){
+      println!("{:#?}", result_time);
       if is_date(&prog_options.time_list.clone()[0]){
         insert_into_weather_items_if_valid_unique_time(
           &mut weather_items, 
