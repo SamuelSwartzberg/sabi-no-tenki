@@ -1,6 +1,6 @@
 use chrono;
 use chrono::{TimeZone, Datelike};
-use crate::error_strings::ErrorStrings;
+use crate::error_strings::{ErrorStrings, err_str};
 use strum::EnumMessage;
 use crate::prog_options::WeekStarts;
 
@@ -29,16 +29,16 @@ fn get_step_or_default(putative_step: Option<&str>, start_string: &str, stop_str
       } else { 
         chrono::Duration::days(1)
       }
-    }, |step_string| parse_duration(step_string).unwrap() )
+    }, |step_string| parse_duration(step_string).expect(err_str(ErrorStrings::CouldNotParseTimeList)) )
 }
 
 fn parse_relative_to_current_date_time (duration_string: &str) -> chrono::DateTime<chrono::Local>{
-  let duration = parse_duration(duration_string).unwrap();
+  let duration = parse_duration(duration_string).expect(err_str(ErrorStrings::CouldNotParseTimeList));
   // hacky checking if duration is a day, will fail if person entered 24h and expected it to be hour, not day-based, but well
   if duration.num_seconds() % chrono::Duration::days(1).num_seconds() == 0 {
-    add_magic_number(chrono::Local::today()).checked_add_signed(duration).unwrap()
+    add_magic_number(chrono::Local::today()).checked_add_signed(duration).expect(err_str(ErrorStrings::IntervalTooLarge))
   } else{
-    chrono::Local::now().checked_add_signed(duration).unwrap()
+    chrono::Local::now().checked_add_signed(duration).expect(err_str(ErrorStrings::IntervalTooLarge))
   }
   
 }
@@ -49,7 +49,7 @@ fn get_vec_of_days(start: chrono::Date<chrono::Local>, end: chrono::Date<chrono:
   if start.and_hms(0,0,0).timestamp() > end.and_hms(0,0,0).timestamp() {panic!("Start in range of time cannot be after end, will cause infinite loop.")};
   while current_day != end {
     week_vec.push(add_magic_number(current_day));
-    current_day = current_day.checked_add_signed(chrono::Duration::days(1)).unwrap();
+    current_day = current_day.checked_add_signed(chrono::Duration::days(1)).expect(err_str(ErrorStrings::IntervalTooLarge));
   }
   week_vec
 }
@@ -57,10 +57,10 @@ fn get_date_based_on_weekday(weekday: chrono::Weekday, week_offset: u32) -> chro
   chrono::Local.from_local_date(
     &chrono::NaiveDate::from_isoywd(
       chrono::offset::Local::now().year(), 
-      chrono::offset::Local::now().iso_week().week() + week_offset, 
+      chrono::offset::Local::now().iso_week().week(), 
       weekday
     )
-  ).unwrap()
+  ).unwrap().checked_add_signed(chrono::Duration::weeks(1)).expect(err_str(ErrorStrings::IntervalTooLarge))
 }
 
 fn get_weekday_of_week_end(week_starts: &WeekStarts) -> chrono::Weekday{
@@ -92,23 +92,23 @@ fn parse_keywords(keyword_string: &str, week_starts: &WeekStarts) ->  Vec<chrono
     "today" => vec![add_magic_number(chrono::Local::today())],
     "week" | "this week" => get_vec_of_days(
       chrono::Local::today(), 
-      get_date_based_on_weekday(get_weekday_of_week_end(week_starts), 0).checked_add_signed(chrono::Duration::days(1)).unwrap() // just specifying the beginning of the week allows us to travel back in time and create an infinite loop so
+      get_date_based_on_weekday(get_weekday_of_week_end(week_starts), 0).checked_add_signed(chrono::Duration::days(1)).expect(err_str(ErrorStrings::IntervalTooLarge)) // just specifying the beginning of the week allows us to travel back in time and create an infinite loop so
     ),
     "weekend" | "this weekend" => {
       let weekend_start_date = get_date_based_on_weekday(get_weekday_of_weekend_start(week_starts), 0);
       get_vec_of_days(
         weekend_start_date, 
-        weekend_start_date.checked_add_signed(chrono::Duration::days(2)).unwrap()
+        weekend_start_date.checked_add_signed(chrono::Duration::days(2)).expect(err_str(ErrorStrings::IntervalTooLarge))
       )
     },
     "next week" => {
       let next_week_start_date = get_date_based_on_weekday(get_weekday_of_week_start(week_starts), 1);
       get_vec_of_days(
         next_week_start_date, 
-        next_week_start_date.checked_add_signed(chrono::Duration::days(7)).unwrap()
+        next_week_start_date.checked_add_signed(chrono::Duration::days(7)).expect(err_str(ErrorStrings::IntervalTooLarge))
       )
     },
-    &_ => panic!(ErrorStrings::NoSuchDateString.get_message().unwrap()) 
+    &_ => panic!(err_str(ErrorStrings::NoSuchDateString)) 
   }
 }
 
@@ -118,12 +118,12 @@ fn add_magic_number(date: chrono::Date<chrono::Local>) -> chrono::DateTime<chron
 
 pub fn parse_time(time_string: String, week_starts: &WeekStarts) -> Vec<chrono::DateTime<chrono::Local>>{
   let mut time_components = time_string.split(":");
-  let first_component = time_components.next().unwrap();
+  let first_component = time_components.next().expect(err_str(ErrorStrings::EmptyTimeImpossible));
   match time_components.next(){
     None => {
       match parse_duration(first_component){
         None => parse_keywords(first_component, week_starts),
-        Some(duration) => vec![chrono::Local::now().checked_add_signed(duration).unwrap()]
+        Some(duration) => vec![chrono::Local::now().checked_add_signed(duration).expect(err_str(ErrorStrings::IntervalTooLarge))]
       }
     }, Some(stop_string) => {
       let start = parse_relative_to_current_date_time(first_component);
@@ -133,7 +133,7 @@ pub fn parse_time(time_string: String, week_starts: &WeekStarts) -> Vec<chrono::
       let mut return_vec: Vec<chrono::DateTime<chrono::Local>> = vec![];
       while stop > current_step{
         return_vec.push(current_step);
-        current_step = current_step.checked_add_signed(step).unwrap();
+        current_step = current_step.checked_add_signed(step).expect(err_str(ErrorStrings::IntervalTooLarge));
       }
       return_vec
     }

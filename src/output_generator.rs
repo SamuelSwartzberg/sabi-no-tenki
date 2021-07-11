@@ -9,7 +9,7 @@ use strum::EnumMessage;
 fn reduce_to_significant_figures(weather_items: &mut Vec<WeatherItem>, significant_figures: u8){
   for weather_item in weather_items{
     for key in weather_item.metrics.clone().keys(){
-      let val = weather_item.metrics.get(key).unwrap();
+      let val = weather_item.metrics.get(key).unwrap(); // should be safe unwrap, we just made sure key exists
       if let Ok(float_val) = val.parse::<f32>(){
         weather_item.metrics.insert((*key).clone(), 
           ((float_val * 10f32.powi(significant_figures.into())).round() / 10f32.powi(significant_figures.into())).to_string()

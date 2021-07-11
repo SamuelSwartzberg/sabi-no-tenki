@@ -2,7 +2,7 @@ use crate::prog_options::ProgOptions;
 use chrono::{Local, FixedOffset, Timelike};
 use serde_json::{/*Result,*/Value};
 use crate::weather_items::{WeatherItem, MetricType, WeatherType};
-use crate::error_strings::ErrorStrings;
+use crate::error_strings::{ErrorStrings, err_str};
 use strum::EnumMessage;
 use indexmap::IndexMap;
 
@@ -61,24 +61,27 @@ pub fn build_location_requests(locations: &Vec<String>) -> Vec<String>{
   requests
 }
 
-pub fn parse_location_results(results: &Vec<String>) -> Vec<(f64, f64)>{
+pub fn parse_location_results(results: &Vec<Value>) -> Vec<(f64, f64)>{
   let mut coordinates: Vec<(f64, f64)> = vec![];
-  println!("{:#?}", results);
   for result in results{
-    let result_json: Value = serde_json::from_str(&result).unwrap();
-    println!("{:#?}", result_json);
-    let first_location = &result_json["data"][0];
-    coordinates.push((first_location["latitude"].as_f64().unwrap(), first_location["longitude"].as_f64().unwrap()))
+    let first_location = &result["data"][0];
+    coordinates.push(
+      (
+        first_location["latitude"].as_f64()
+        .expect(&("latitude".to_owned() + err_str(ErrorStrings::NotInExpectedPlace))), 
+        first_location["longitude"].as_f64()
+        .expect(&("Longitude".to_owned() + err_str(ErrorStrings::NotInExpectedPlace)))
+      )
+    )
   }
   coordinates
 }
 
-pub fn parse_location_results_names(results: &Vec<String>) -> Vec<String>{
+pub fn parse_location_results_names(results: &Vec<Value>) -> Vec<String>{
   let mut names: Vec<String> = vec![];
   for result in results{
-    let result_json: Value = serde_json::from_str(&result).unwrap();
-    let first_location = &result_json["data"][0];
-    names.push(first_location["name"].as_str().unwrap().to_string() + ", " + &first_location["country"].as_str().unwrap())
+    let first_location = &result["data"][0];
+    names.push(first_location["name"].as_str().expect(&("Name".to_owned() + err_str(ErrorStrings::NotInExpectedPlace))).to_string() + ", " + &first_location["country"].as_str().expect(&("Country".to_owned() + err_str(ErrorStrings::NotInExpectedPlace))))
   }
   names
 }
@@ -118,7 +121,7 @@ fn assemble_weather_item(time_mapping: &serde_json::Map<String, Value>, time: ch
         value.to_string()
       };
       if key_enum_val == MetricType::WeatherType{
-        value_as_string = get_weather_type_for_local_name(&value_as_string).expect(ErrorStrings::NoSuchWeatherType.get_message().unwrap()).to_string();
+        value_as_string = get_weather_type_for_local_name(&value_as_string).expect(err_str(ErrorStrings::NoSuchWeatherType)).to_string();
       } 
       metrics.insert(key_enum_val, value_as_string);
     }
@@ -135,7 +138,7 @@ fn assemble_weather_item(time_mapping: &serde_json::Map<String, Value>, time: ch
 fn insert_into_weather_items_if_valid_unique_time(weather_items: &mut Vec<WeatherItem>, result_time: serde_json::Value, location: String, is_relevant_time: &dyn Fn(chrono::DateTime<FixedOffset>) -> bool, is_date: bool){
   if let Some(time_mapping) = result_time.as_object(){
     if let Some(time_value) = time_mapping.get("time"){
-      if let Ok(time) = time_value.as_str().unwrap().parse::<chrono::DateTime<FixedOffset>>(){
+      if let Ok(time) = time_value.as_str().expect(&("Time value".to_owned() + err_str(ErrorStrings::NotOfExpectedType))).parse::<chrono::DateTime<FixedOffset>>(){
         if is_relevant_time(time) {
           weather_items.push(assemble_weather_item(time_mapping, time, location, is_date));
         }
@@ -149,7 +152,7 @@ fn is_date(first_time: &chrono::DateTime<Local>)-> bool{
 }
 
 fn get_relevant_results_time_array(results: &serde_json::Map<String, Value>, first_time: &chrono::DateTime<Local>) -> Vec<serde_json::Value> {
-  results.get(if is_date(&first_time) {"daily"} else {"hourly"}).unwrap().as_array().unwrap().clone()
+  results.get(if is_date(&first_time) {"daily"} else {"hourly"}).expect(&("Array of time values".to_owned() + err_str(ErrorStrings::NotInExpectedPlace))).as_array().expect(&("Array of time values".to_owned() + err_str(ErrorStrings::NotOfExpectedType))).clone()
 }
 
 fn local_to_fixed(local_date_time: chrono::DateTime<Local>) -> chrono::DateTime<FixedOffset> {
@@ -157,17 +160,16 @@ fn local_to_fixed(local_date_time: chrono::DateTime<Local>) -> chrono::DateTime<
 }
 
 
-pub fn parse_results(results: Vec<String>, prog_options: &ProgOptions, location_names: Vec<String>) -> Vec<Vec<WeatherItem>>{
+pub fn parse_results(results: Vec<Value>, prog_options: &ProgOptions, location_names: Vec<String>) -> Vec<Vec<WeatherItem>>{
   
   let mut weather_items_different_locations: Vec<Vec<WeatherItem>> = vec![];
   
   for (result, location) in results.iter().zip(location_names.into_iter()){
 
     let mut weather_items: Vec<WeatherItem> = vec![];
-    let results_json: Value = serde_json::from_str(&result).unwrap();
-    let results = results_json["data"].as_object().unwrap();
+    let result_data = result["data"].as_object().expect(&("Data of API results".to_owned() + err_str(ErrorStrings::NotOfExpectedType)));
 
-    for result_time in get_relevant_results_time_array(results, &prog_options.time_list[0]){
+    for result_time in get_relevant_results_time_array(result_data, &prog_options.time_list[0]){
       if is_date(&prog_options.time_list.clone()[0]){
         insert_into_weather_items_if_valid_unique_time(
           &mut weather_items, 

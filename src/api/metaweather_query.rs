@@ -23,15 +23,15 @@
 // visibility
 // predictability	
 
-#[derive(Debug)]
-struct MetaweatherQuery{
-//  generic_metric_names_map: IndexMap<MetricType, &str>
-}
-//
-impl Query for MetaweatherQuery{
-//  fn build_request(options: &ProgOptions ){};
-//  fn parse_result() -> Vec<WeatherItem>{};
-  fn get_names(&self) -> Vec<&str>{
-    vec!["metaweather", "mw"]     
-  }
-}
+// #[derive(Debug)]
+// struct MetaweatherQuery{
+// //  generic_metric_names_map: IndexMap<MetricType, &str>
+// }
+// //
+// impl Query for MetaweatherQuery{
+// //  fn build_request(options: &ProgOptions ){};
+// //  fn parse_result() -> Vec<WeatherItem>{};
+//   fn get_names(&self) -> Vec<&str>{
+//     vec!["metaweather", "mw"]     
+//   }
+// }
