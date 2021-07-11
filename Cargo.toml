@@ -6,7 +6,7 @@ edition = "2018"
 license = "MIT OR Apache-2.0"
 homepage = samswartzberg.com
 repository = https://github.com/SamuelSwartzberg/sabi-no-tenki
-readme = 
+readme = "README.md"
 keywords = ["weather", "CLI"]
 categories = ["command-line-utilities"]
 
