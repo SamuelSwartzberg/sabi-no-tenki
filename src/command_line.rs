@@ -1,6 +1,6 @@
 use clap::{Arg, App /*, SubCommand*/};
 pub fn get_command_line_input() -> clap::ArgMatches { //possibly remove static lifetimes once I become clear what the lifetimes of App are
-    return App::new("Sabi no Tenki")
+    return App::new("Sabi no Arashi")
     .version("0.0")
     .author("Sam S. <me@samswartzberg.com>")
     .about("A terminal command line weather client with fine-grained options and a pretentious and possibly incorrect japanese name. Can also be configured via $XDG_CONFIG_HOME/tenki_config.yaml (.config/tenki_config.yaml). Keys are the same names as options, but using underscores instead. Boolean flags cannot be set via config, as it would not be able to override them from the command line.")
