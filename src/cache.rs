@@ -15,7 +15,6 @@ pub fn get_result_from_cache(cache_duration: &chrono::Duration, cache_type: &str
             let cache_string = std::fs::read_to_string(get_path::get_cache_full_path(cache_type, &requests)?).ok()?;
             Some(serde_json::from_str::<serde_json::Value>(&cache_string).ok()?.as_array()?.clone())
           } else { 
-            eprintln!("{:#?}", "Cache too old, won't use."); 
             std::fs::remove_file(get_path::get_cache_full_path(cache_type, &requests)?);
             None }
         }
