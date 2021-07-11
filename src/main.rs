@@ -16,11 +16,9 @@ use error_strings::{ErrorStrings, err_str};
 
 fn get_results_from_cache_or_http(requests: Vec<String>, cache_type: &str, cache_duration: &chrono::Duration) -> Vec<serde_json::Value>{
   if let Some(cache_str) = cache::get_result_from_cache(cache_duration, cache_type, &requests) {
-    println!("{:#?}", "trying to retrieve from cache");
     cache_str
   } else {
     let results = http_request::get_results_from_requests(&requests).unwrap();
-    println!("{:#?}", "trying to cache");
     if let None = cache::cache_result(&results, cache_type, &requests){
       eprintln!("{:#?}", err_str(ErrorStrings::CacheWriteFail))
     }

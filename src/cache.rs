@@ -3,8 +3,8 @@ use crate::get_path;
 /*use chrono::{Local};*/
 use serde_json;
 use crate::utils::system_time_to_date_time;
-use crate::error_strings::{ErrorStrings, err_str};
 
+#[allow(unused_must_use)]
 pub fn get_result_from_cache(cache_duration: &chrono::Duration, cache_type: &str, requests: &Vec<String>)-> Option<Vec<serde_json::Value>>{ 
   match std::fs::metadata(get_path::get_cache_full_path(cache_type, &requests)?){
     Ok(metadata) => {
@@ -26,8 +26,8 @@ pub fn get_result_from_cache(cache_duration: &chrono::Duration, cache_type: &str
   }
 } 
  
+#[allow(unused_must_use)]
 pub fn cache_result(result: &Vec<serde_json::Value>, cache_type: &str, requests: &Vec<String>) -> Option<()>{
-  println!("{:#?}", get_path::get_cache_full_path(cache_type, &requests)?);
   std::fs::create_dir(get_path::get_cache_path()?);
   std::fs::remove_file(get_path::get_cache_full_path(cache_type, &requests)?); //remove file so file creation time will be updated
   std::fs::write(get_path::get_cache_full_path(cache_type, &requests)?, serde_json::to_string(result).ok()?);

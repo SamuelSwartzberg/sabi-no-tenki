@@ -1,6 +1,7 @@
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
+#[allow(unused_assignments)]
 fn get_xdg_or_default(xdg_variant: String) -> Option<String> {
   let mut output = "".to_owned();
   if let Ok(xdg_var) = std::env::var(
@@ -19,7 +20,6 @@ pub fn get_cache_file_name(cache_type: &str, requests: &Vec<String>) ->  String 
   let mut hasher = DefaultHasher::new();
   requests.hash(&mut hasher);
   let hash = hasher.finish().to_string();
-  println!("{:#?}", hash);
   cache_type.to_owned()+"_" + &hash+".json"
 }
 

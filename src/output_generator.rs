@@ -22,7 +22,7 @@ fn reduce_to_significant_figures(weather_items: &mut Vec<WeatherItem>, significa
 
 fn format_weather_type_as_emoji_or_text(weather_items: &mut Vec<WeatherItem>, emoji: bool, text: bool){
   for weather_item in weather_items{
-    if let Some(weather_type) = weather_item.metrics.get(&MetricType::WeatherType){
+    if let Some(weather_type) = weather_item.metrics.clone().get(&MetricType::WeatherType){
       weather_item.metrics.insert(
         MetricType::WeatherType, 
         get_relevant_message(

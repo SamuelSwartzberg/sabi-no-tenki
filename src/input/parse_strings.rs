@@ -2,7 +2,6 @@ mod parse_time;
 
 use crate::weather_items::MetricType;
 use crate::error_strings::{ErrorStrings, err_str};
-use strum::EnumMessage;
 pub use parse_time::parse_time as parse_time;
 use chrono;
 use std::str::FromStr;

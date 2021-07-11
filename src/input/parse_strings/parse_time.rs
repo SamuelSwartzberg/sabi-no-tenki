@@ -1,7 +1,6 @@
 use chrono;
 use chrono::{TimeZone, Datelike};
 use crate::error_strings::{ErrorStrings, err_str};
-use strum::EnumMessage;
 use crate::prog_options::WeekStarts;
 
 fn parse_duration(duration_string: &str) -> Option<chrono::Duration>{
@@ -60,7 +59,7 @@ fn get_date_based_on_weekday(weekday: chrono::Weekday, week_offset: u32) -> chro
       chrono::offset::Local::now().iso_week().week(), 
       weekday
     )
-  ).unwrap().checked_add_signed(chrono::Duration::weeks(1)).expect(err_str(ErrorStrings::IntervalTooLarge))
+  ).unwrap().checked_add_signed(chrono::Duration::weeks(week_offset.into())).expect(err_str(ErrorStrings::IntervalTooLarge))
 }
 
 fn get_weekday_of_week_end(week_starts: &WeekStarts) -> chrono::Weekday{

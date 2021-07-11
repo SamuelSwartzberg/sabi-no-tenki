@@ -3,7 +3,6 @@ use chrono::{Local, FixedOffset, Timelike};
 use serde_json::{/*Result,*/Value};
 use crate::weather_items::{WeatherItem, MetricType, WeatherType};
 use crate::error_strings::{ErrorStrings, err_str};
-use strum::EnumMessage;
 use indexmap::IndexMap;
 
 

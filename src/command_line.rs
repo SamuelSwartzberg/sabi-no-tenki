@@ -31,7 +31,7 @@ pub fn get_command_line_input() -> clap::ArgMatches { //possibly remove static l
         .takes_value(true))
     .arg(Arg::new("cache_duration")
         .long("cache-duration")
-        .about("Specify the age of cached results you accept. Currently only caches the previous request.")
+        .about("Specify the age of cached results you accept.")
         .value_name("DURATION")
         .takes_value(true))
     .arg(Arg::new("significant_figures")
