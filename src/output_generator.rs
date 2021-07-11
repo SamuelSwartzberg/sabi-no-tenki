@@ -3,6 +3,7 @@ use crate::weather_items::{WeatherItem, WeatherType, MetricType, get_relevant_me
 use crate::prog_options::ProgOptions;
 use std::str::FromStr;
 use strum::EnumMessage;
+use crate::error_strings::{ErrorStrings, err_str};
 //use indexmap::IndexMap;
 
 
@@ -22,7 +23,15 @@ fn reduce_to_significant_figures(weather_items: &mut Vec<WeatherItem>, significa
 fn format_weather_type_as_emoji_or_text(weather_items: &mut Vec<WeatherItem>, emoji: bool, text: bool){
   for weather_item in weather_items{
     if let Some(weather_type) = weather_item.metrics.get(&MetricType::WeatherType){
-      weather_item.metrics.insert(MetricType::WeatherType, get_relevant_message(WeatherType::from_str(&weather_type).unwrap(), emoji, text).unwrap());
+      weather_item.metrics.insert(
+        MetricType::WeatherType, 
+        get_relevant_message(
+          WeatherType::from_str(&weather_type)
+            .expect(err_str(ErrorStrings::NoWeatherTypeForIntermediaryString)), 
+          emoji, 
+          text
+        ).expect(err_str(ErrorStrings::NoStringRepresentationWeather))
+      );
     }
   }
 }
@@ -33,12 +42,12 @@ fn to_yaml_string(weather_items: &mut Vec<WeatherItem>) -> Vec<String>{
   for weather_item in weather_items{
     let mut weather_item_map = std::collections::HashMap::<String, serde_yaml::Value>::new();
     let format_string = if weather_item.is_date {"%F"} else {"%F %R"};
-    weather_item_map.insert("date".to_string(), serde_yaml::to_value(weather_item.time.format(format_string).to_string()).unwrap());
-    weather_item_map.insert("location".to_string(), serde_yaml::to_value(weather_item.location.clone()).unwrap());
-    weather_item_map.insert("metrics".to_string(), serde_yaml::to_value(weather_item.metrics.clone()).unwrap());
+    weather_item_map.insert("date".to_string(), serde_yaml::to_value(weather_item.time.format(format_string).to_string()).expect(err_str(ErrorStrings::CannotSerializeToYaml)));
+    weather_item_map.insert("location".to_string(), serde_yaml::to_value(weather_item.location.clone()).expect(err_str(ErrorStrings::CannotSerializeToYaml)));
+    weather_item_map.insert("metrics".to_string(), serde_yaml::to_value(weather_item.metrics.clone()).expect(err_str(ErrorStrings::CannotSerializeToYaml)));
     weather_map_vec.push(weather_item_map);
   }
-  serde_yaml::to_string(&weather_map_vec).unwrap().lines().map(|item| item.to_string()).collect()
+  serde_yaml::to_string(&weather_map_vec).expect(err_str(ErrorStrings::CannotSerializeToYaml)).lines().map(|item| item.to_string()).collect()
 }
 
 fn build_blocks_of_output(weather_items: &mut Vec<WeatherItem>,  metrics: &Vec<MetricType>, labeled_columns: bool) -> Vec<Vec<String>>{
@@ -48,7 +57,7 @@ fn build_blocks_of_output(weather_items: &mut Vec<WeatherItem>,  metrics: &Vec<M
     first_column.append(
       &mut weather_items[0].metrics.keys()
       .filter(|key| metrics.contains(&key))
-      .map(|key| key.get_message().unwrap().to_string()).collect::<Vec<String>>()
+      .map(|key| key.get_message().expect(err_str(ErrorStrings::NoStringRepresentationMetric)).to_string()).collect::<Vec<String>>()
     );
     output_blocks_vector.push(first_column);
   }

@@ -27,8 +27,9 @@ pub fn get_result_from_cache(cache_duration: &chrono::Duration, cache_type: &str
 } 
  
 pub fn cache_result(result: &Vec<serde_json::Value>, cache_type: &str, requests: &Vec<String>) -> Option<()>{
-  std::fs::create_dir(get_path::get_cache_path().ok()?).ok()?;
-  std::fs::remove_file(get_path::get_cache_full_path(cache_type, &requests)?).ok()?; //remove file so file creation time will be updated
-  std::fs::write(get_path::get_cache_full_path(cache_type, &requests)?, serde_json::to_string(result).ok()?).ok()?;
-  some(())
+  println!("{:#?}", get_path::get_cache_full_path(cache_type, &requests)?);
+  std::fs::create_dir(get_path::get_cache_path()?);
+  std::fs::remove_file(get_path::get_cache_full_path(cache_type, &requests)?); //remove file so file creation time will be updated
+  std::fs::write(get_path::get_cache_full_path(cache_type, &requests)?, serde_json::to_string(result).ok()?);
+  Some(())
 }

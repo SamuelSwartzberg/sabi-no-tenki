@@ -2,11 +2,15 @@ use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
 fn get_xdg_or_default(xdg_variant: String) -> Option<String> {
-  Some(std::env::var(
+  let mut output = "".to_owned();
+  if let Ok(xdg_var) = std::env::var(
     "XDG".to_owned() + &xdg_variant.to_ascii_uppercase() + "_HOME"
-  ).unwrap_or_else(
-    |_ /* compiler told me to but not sure why i'm even getting an arg here*/| std::env::var("HOME").ok()? + "/." + &xdg_variant
-  ) + "/")
+  ) {
+    output = xdg_var;
+  } else {
+    output = std::env::var("HOME").ok()? + "/." + &xdg_variant;
+  }
+  Some(output + "/")
 }
 pub fn get_cache_path()-> Option<String>{
   Some(get_xdg_or_default("cache".to_string())?+"tenki/")

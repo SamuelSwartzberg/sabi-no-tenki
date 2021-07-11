@@ -22,7 +22,7 @@ impl ConfigView{
   }
 }
 pub fn get_config_view() -> Option<ConfigView>{
-  let yaml_string = std::fs::read_to_string(get_path::get_config_location()).ok()?;
+  let yaml_string = std::fs::read_to_string(get_path::get_config_location()?).ok()?;
   let deserializer = serde_yaml::Deserializer::from_str(&yaml_string);
   let toplevel_yaml_item =  serde_yaml::Value::deserialize(deserializer).ok()?;
   if !toplevel_yaml_item.is_mapping() {

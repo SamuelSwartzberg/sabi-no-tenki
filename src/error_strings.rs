@@ -1,8 +1,9 @@
 /*use strum;*/
+use strum;
+use strum_macros;
 use strum::EnumMessage;
-use strum_macros::EnumMessage;
 
-#[derive(Debug, strum::EnumMessage, strum_macros::EnumMessage)]
+#[derive(Debug,  strum_macros::EnumMessage)]
 pub enum ErrorStrings{
   #[strum(message = "API expected but none provided!")]
   NoApi,
@@ -35,9 +36,17 @@ pub enum ErrorStrings{
   #[strum(message = " was expected in this location while parsing the result from the API, but something else was found.")]
   NotInExpectedPlace,
   #[strum(message = " was found in the expeced location, but was not of the expected type.")]
-  NotOfExpectedType
+  NotOfExpectedType,
   #[strum(message = "Error while attempting to write to cache.")]
-  CacheWriteFail
+  CacheWriteFail,
+  #[strum(message = "In trying to read a intermediary string representation into a weather type, encountered an error.")]
+  NoWeatherTypeForIntermediaryString,
+  #[strum(message = "The specified weather type lacks a string representation.")]
+  NoStringRepresentationWeather,
+  #[strum(message = "The specified metric lacks a string representation.")]
+  NoStringRepresentationMetric,
+  #[strum(message = "The specified item encountered an error while being serialized to YAML output.")]
+  CannotSerializeToYaml
 }
 
 pub fn err_str(error_string: ErrorStrings) -> &'static str{
