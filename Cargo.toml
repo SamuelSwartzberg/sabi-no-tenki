@@ -5,6 +5,7 @@ authors = ["Sam Swartzberg <me@samswartzberg.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 homepage = "samswartzberg.com"
+description = "A CLI weather app. Features caching!"
 repository = "https://github.com/SamuelSwartzberg/sabi-no-tenki"
 readme = "README.md"
 keywords = ["weather", "CLI"]
