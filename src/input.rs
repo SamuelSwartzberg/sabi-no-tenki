@@ -25,6 +25,7 @@ fn replace_with_config(config: ConfigView, options: &mut ProgOptions){
   if let Some(res) = config.value_of("graph") {options.graph = parse_metric_vector(res)};
   if let Some(res) = config.value_of("cache_duration") {options.cache_duration = parse_cache_duration(res)}; 
   if let Some(res) = config.value_of("metrics") {options.metrics = parse_metric_vector(res)};
+  
 }
 fn replace_with_arguments(clap_matches: &clap::ArgMatches, options: &mut ProgOptions){
   let bool_flags = check_clap_boolean_flags(vec!["emoji", "text", "human_readable", "labeled_columns"], &clap_matches);
